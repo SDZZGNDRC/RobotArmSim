@@ -26,6 +26,9 @@ public:
 
 	void UpdateCamera();
 
+	// drawing functions
+	void DrawBox(const btVector3& halfSize, const btVector3& color = btVector3(1.0f, 1.0f, 1.0f));
+
 protected:
 	// camera controls
 	btVector3 m_cameraPosition; // the camera's current position
