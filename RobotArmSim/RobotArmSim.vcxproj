@@ -71,8 +71,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);E:\freeglut\include;E:\bullet3-3.17\src</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);E:\freeglut\lib;E:\bullet3.17\lib</LibraryPath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);E:\freeglut\include;E:\bullet3-3.17\src;E:\bullet3-3.17\src\BulletCollision;E:\bullet3-3.17\src\BulletDynamics;E:\bullet3-3.17\src\LinearMath;E:\bullet3-3.17\src\btBulletCollisionAll.cpp;E:\bullet3-3.17\src\btBulletCollisionCommon.h;E:\bullet3-3.17\src\btBulletDynamicsAll.cpp;E:\bullet3-3.17\src\btBulletDynamicsCommon.h;E:\bullet3-3.17\src\btLinearMathAll.cpp</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);E:\freeglut\lib;E:\bullet3.17\lib\Debug;E:\bullet3.17\lib\Release</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);E:\freeglut\include;</IncludePath>
@@ -112,12 +112,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
+      <AdditionalDependencies>LinearMath_Debug.lib;BulletDynamics_Debug.lib;BulletCollision_Debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -137,10 +139,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BasicDemo.cpp" />
     <ClCompile Include="BulletOpenGLApplication.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BasicDemo.h" />
     <ClInclude Include="BulletOpenGLApplication.h" />
     <ClInclude Include="FreeGLUTCallbacks.h" />
   </ItemGroup>
