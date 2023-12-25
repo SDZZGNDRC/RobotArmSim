@@ -142,6 +142,7 @@
     <ClCompile Include="BasicDemo.cpp" />
     <ClCompile Include="BulletOpenGLApplication.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="OpenGLMotionState.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BasicDemo.h" />
