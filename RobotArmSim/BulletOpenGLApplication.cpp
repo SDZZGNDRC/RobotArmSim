@@ -502,7 +502,8 @@ void BulletOpenGLApplication::ShootBox(const btVector3& direction) {
 	pObject->GetRigidBody()->setLinearVelocity(velocity);
 }
 
-bool BulletOpenGLApplication::Raycast(const btVector3& startPosition, const btVector3& direction, RayResult& output) {
+/*REM**	bool BulletOpenGLApplication::Raycast(const btVector3 &startPosition, const btVector3 &direction, RayResult &output) { **/
+/*ADD*/	bool BulletOpenGLApplication::Raycast(const btVector3& startPosition, const btVector3& direction, RayResult& output, bool includeStatic) {
 	if (!m_pWorld)
 		return false;
 
@@ -526,8 +527,9 @@ bool BulletOpenGLApplication::Raycast(const btVector3& startPosition, const btVe
 
 		// prevent us from picking objects 
 		// like the ground plane
-		if (pBody->isStaticObject() || pBody->isKinematicObject())
-			return false;
+		/*ADD*/		if (!includeStatic) // skip this check if we want it to hit static objects
+			if (pBody->isStaticObject() || pBody->isKinematicObject())
+				return false;
 
 		// set the result data
 		output.pBody = pBody;
@@ -701,29 +703,11 @@ void BulletOpenGLApplication::CheckForCollisionEvents() {
 }
 
 void BulletOpenGLApplication::CollisionEvent(btRigidBody* pBody0, btRigidBody* pBody1) {
-	/*REM*	// find the two colliding objects				*/
-	/*REM*		GameObject* pObj0 = FindGameObject(pBody0); */
-	/*REM*		GameObject* pObj1 = FindGameObject(pBody1); */
-	/*REM*													*/
-	/*REM*		// exit if we didn't find anything			*/
-	/*REM*		if (!pObj0 || !pObj1) return;				*/
-	/*REM*													*/
-	/*REM*		// set their colors to white				*/
-	/*REM*		pObj0->SetColor(btVector3(1.0,1.0,1.0));	*/
-	/*REM*		pObj1->SetColor(btVector3(1.0,1.0,1.0));	*/
+
 }
 
 void BulletOpenGLApplication::SeparationEvent(btRigidBody* pBody0, btRigidBody* pBody1) {
-	/*REM*		// get the two separating objects							*/
-	/*REM*		GameObject* pObj0 = FindGameObject((btRigidBody*)pBody0);	*/
-	/*REM*		GameObject* pObj1 = FindGameObject((btRigidBody*)pBody1);	*/
-	/*REM*																	*/
-	/*REM*		// exit if we didn't find anything							*/
-	/*REM*		if (!pObj0 || !pObj1) return;								*/
-	/*REM*																	*/
-	/*REM*		// set their colors to black								*/
-	/*REM*		pObj0->SetColor(btVector3(0.0,0.0,0.0));					*/
-	/*REM*		pObj1->SetColor(btVector3(0.0,0.0,0.0));					*/
+
 }
 
 GameObject* BulletOpenGLApplication::FindGameObject(btRigidBody* pBody) {
