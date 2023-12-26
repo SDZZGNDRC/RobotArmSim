@@ -15,16 +15,16 @@
 
 #include "GameObject.h"
 #include <vector>
-/*ADD*/	#include <set>
-/*ADD*/	#include <iterator>
-/*ADD*/	#include <algorithm>
+#include <set>
+#include <iterator>
+#include <algorithm>
 
 // a convenient typedef to reference an STL vector of GameObjects
 typedef std::vector<GameObject*> GameObjects;
 
-/*ADD*/	// convenient typedefs for collision events
-/*ADD*/	typedef std::pair<const btRigidBody*, const btRigidBody*> CollisionPair;
-/*ADD*/	typedef std::set<CollisionPair> CollisionPairs;
+// convenient typedefs for collision events
+typedef std::pair<const btRigidBody*, const btRigidBody*> CollisionPair;
+typedef std::set<CollisionPair> CollisionPairs;
 
 // struct to store our raycasting results
 struct RayResult {
@@ -77,7 +77,7 @@ public:
 
 	void ShootBox(const btVector3& direction);
 	void DestroyGameObject(btRigidBody* pBody);
-	/*ADD*/		GameObject* FindGameObject(btRigidBody* pBody);
+	GameObject* FindGameObject(btRigidBody* pBody);
 
 	// picking functions
 	btVector3 GetPickingRay(int x, int y);
@@ -87,10 +87,10 @@ public:
 	void CreatePickingConstraint(int x, int y);
 	void RemovePickingConstraint();
 
-	/*ADD*/		// collision event functions
-	/*ADD*/		void CheckForCollisionEvents();
-	/*ADD*/		virtual void CollisionEvent(btRigidBody* pBody0, btRigidBody* pBody1);
-	/*ADD*/		virtual void SeparationEvent(btRigidBody* pBody0, btRigidBody* pBody1);
+	// collision event functions
+	void CheckForCollisionEvents();
+	virtual void CollisionEvent(btRigidBody* pBody0, btRigidBody* pBody1);
+	virtual void SeparationEvent(btRigidBody* pBody0, btRigidBody* pBody1);
 
 protected:
 	// camera control
@@ -127,7 +127,7 @@ protected:
 	btTypedConstraint* m_pPickConstraint;	// the constraint the body is attached to
 	btScalar m_oldPickingDist;				// the distance from the camera to the hit point (so we can move the object up, down, left and right from our view)
 
-	/*ADD*/		// collision event variables
-	/*ADD*/		CollisionPairs m_pairsLastUpdate;
+	// collision event variables
+	CollisionPairs m_pairsLastUpdate;
 };
 #endif

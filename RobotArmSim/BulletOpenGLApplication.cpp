@@ -400,8 +400,8 @@ void BulletOpenGLApplication::UpdateScene(float dt) {
 		// determined back in ::Idle() by our clock object.
 		m_pWorld->stepSimulation(dt);
 
-		/*ADD*/			// check for any new collisions/separations
-		/*ADD*/			CheckForCollisionEvents();
+		// check for any new collisions/separations
+		CheckForCollisionEvents();
 	}
 }
 
@@ -637,113 +637,103 @@ void BulletOpenGLApplication::RemovePickingConstraint() {
 	m_pPickedBody = 0;
 }
 
-/*ADD*/	void BulletOpenGLApplication::CheckForCollisionEvents() {
-	/*ADD*/		// keep a list of the collision pairs we
-	/*ADD*/		// found during the current update
-	/*ADD*/		CollisionPairs pairsThisUpdate;
-	/*ADD*/
-	/*ADD*/		// iterate through all of the manifolds in the dispatcher
-	/*ADD*/		for (int i = 0; i < m_pDispatcher->getNumManifolds(); ++i) {
-		/*ADD*/
-		/*ADD*/			// get the manifold
-		/*ADD*/			btPersistentManifold* pManifold = m_pDispatcher->getManifoldByIndexInternal(i);
-		/*ADD*/
-		/*ADD*/			// ignore manifolds that have 
-		/*ADD*/			// no contact points.
-		/*ADD*/			if (pManifold->getNumContacts() > 0) {
-			/*ADD*/				// get the two rigid bodies involved in the collision
-			/*ADD*/				const btRigidBody* pBody0 = static_cast<const btRigidBody*>(pManifold->getBody0());
-			/*ADD*/				const btRigidBody* pBody1 = static_cast<const btRigidBody*>(pManifold->getBody1());
-			/*ADD*/
-			/*ADD*/				// always create the pair in a predictable order
-			/*ADD*/				// (use the pointer value..)
-			/*ADD*/				bool const swapped = pBody0 > pBody1;
-			/*ADD*/				const btRigidBody* pSortedBodyA = swapped ? pBody1 : pBody0;
-			/*ADD*/				const btRigidBody* pSortedBodyB = swapped ? pBody0 : pBody1;
-			/*ADD*/
-			/*ADD*/				// create the pair
-			/*ADD*/				CollisionPair thisPair = std::make_pair(pSortedBodyA, pSortedBodyB);
-			/*ADD*/
-			/*ADD*/				// insert the pair into the current list
-			/*ADD*/				pairsThisUpdate.insert(thisPair);
-			/*ADD*/
-			/*ADD*/				// if this pair doesn't exist in the list
-			/*ADD*/				// from the previous update, it is a new
-			/*ADD*/				// pair and we must send a collision event
-			/*ADD*/				if (m_pairsLastUpdate.find(thisPair) == m_pairsLastUpdate.end()) {
-				/*ADD*/					CollisionEvent((btRigidBody*)pBody0, (btRigidBody*)pBody1);
-				/*ADD*/
+void BulletOpenGLApplication::CheckForCollisionEvents() {
+	// keep a list of the collision pairs we
+	// found during the current update
+	CollisionPairs pairsThisUpdate;
+
+	// iterate through all of the manifolds in the dispatcher
+	for (int i = 0; i < m_pDispatcher->getNumManifolds(); ++i) {
+
+		// get the manifold
+		btPersistentManifold* pManifold = m_pDispatcher->getManifoldByIndexInternal(i);
+
+		// ignore manifolds that have 
+		// no contact points.
+		if (pManifold->getNumContacts() > 0) {
+			// get the two rigid bodies involved in the collision
+			const btRigidBody* pBody0 = static_cast<const btRigidBody*>(pManifold->getBody0());
+			const btRigidBody* pBody1 = static_cast<const btRigidBody*>(pManifold->getBody1());
+
+			// always create the pair in a predictable order
+			// (use the pointer value..)
+			bool const swapped = pBody0 > pBody1;
+			const btRigidBody* pSortedBodyA = swapped ? pBody1 : pBody0;
+			const btRigidBody* pSortedBodyB = swapped ? pBody0 : pBody1;
+
+			// create the pair
+			CollisionPair thisPair = std::make_pair(pSortedBodyA, pSortedBodyB);
+
+			// insert the pair into the current list
+			pairsThisUpdate.insert(thisPair);
+
+			// if this pair doesn't exist in the list
+			// from the previous update, it is a new
+			// pair and we must send a collision event
+			if (m_pairsLastUpdate.find(thisPair) == m_pairsLastUpdate.end()) {
+				CollisionEvent((btRigidBody*)pBody0, (btRigidBody*)pBody1);
 			}
-			/*ADD*/
 		}
-		/*ADD*/
 	}
-	/*ADD*/
-	/*ADD*/		// create another list for pairs that
-	/*ADD*/		// were removed this update
-	/*ADD*/		CollisionPairs removedPairs;
-	/*ADD*/
-	/*ADD*/		// this handy function gets the difference beween
-	/*ADD*/		// two sets. It takes the difference between
-	/*ADD*/		// collision pairs from the last update, and this 
-	/*ADD*/		// update and pushes them into the removed pairs list
-	/*ADD*/		std::set_difference(m_pairsLastUpdate.begin(), m_pairsLastUpdate.end(),
-		/*ADD*/		pairsThisUpdate.begin(), pairsThisUpdate.end(),
-		/*ADD*/		std::inserter(removedPairs, removedPairs.begin()));
-	/*ADD*/
-	/*ADD*/		// iterate through all of the removed pairs
-	/*ADD*/		// sending separation events for them
-	/*ADD*/		for (CollisionPairs::const_iterator iter = removedPairs.begin(); iter != removedPairs.end(); ++iter) {
-		/*ADD*/			SeparationEvent((btRigidBody*)iter->first, (btRigidBody*)iter->second);
-		/*ADD*/
+
+	// create another list for pairs that
+	// were removed this update
+	CollisionPairs removedPairs;
+
+	// this handy function gets the difference beween
+	// two sets. It takes the difference between
+	// collision pairs from the last update, and this 
+	// update and pushes them into the removed pairs list
+	std::set_difference(m_pairsLastUpdate.begin(), m_pairsLastUpdate.end(),
+		pairsThisUpdate.begin(), pairsThisUpdate.end(),
+		std::inserter(removedPairs, removedPairs.begin()));
+
+	// iterate through all of the removed pairs
+	// sending separation events for them
+	for (CollisionPairs::const_iterator iter = removedPairs.begin(); iter != removedPairs.end(); ++iter) {
+		SeparationEvent((btRigidBody*)iter->first, (btRigidBody*)iter->second);
 	}
-	/*ADD*/
-	/*ADD*/		// in the next iteration we'll want to
-	/*ADD*/		// compare against the pairs we found
-	/*ADD*/		// in this iteration
-	/*ADD*/		m_pairsLastUpdate = pairsThisUpdate;
-	/*ADD*/
+
+	// in the next iteration we'll want to
+	// compare against the pairs we found
+	// in this iteration
+	m_pairsLastUpdate = pairsThisUpdate;
 }
-/*ADD*/
-/*ADD*/	void BulletOpenGLApplication::CollisionEvent(btRigidBody* pBody0, btRigidBody* pBody1) {
-	/*ADD*/		// find the two colliding objects
-	/*ADD*/		GameObject* pObj0 = FindGameObject(pBody0);
-	/*ADD*/		GameObject* pObj1 = FindGameObject(pBody1);
-	/*ADD*/
-	/*ADD*/		// exit if we didn't find anything
-	/*ADD*/		if (!pObj0 || !pObj1) return;
-	/*ADD*/
-	/*ADD*/		// set their colors to white
-	/*ADD*/		pObj0->SetColor(btVector3(1.0, 1.0, 1.0));
-	/*ADD*/		pObj1->SetColor(btVector3(1.0, 1.0, 1.0));
-	/*ADD*/
+
+void BulletOpenGLApplication::CollisionEvent(btRigidBody* pBody0, btRigidBody* pBody1) {
+	/*REM*	// find the two colliding objects				*/
+	/*REM*		GameObject* pObj0 = FindGameObject(pBody0); */
+	/*REM*		GameObject* pObj1 = FindGameObject(pBody1); */
+	/*REM*													*/
+	/*REM*		// exit if we didn't find anything			*/
+	/*REM*		if (!pObj0 || !pObj1) return;				*/
+	/*REM*													*/
+	/*REM*		// set their colors to white				*/
+	/*REM*		pObj0->SetColor(btVector3(1.0,1.0,1.0));	*/
+	/*REM*		pObj1->SetColor(btVector3(1.0,1.0,1.0));	*/
 }
-/*ADD*/
-/*ADD*/	void BulletOpenGLApplication::SeparationEvent(btRigidBody* pBody0, btRigidBody* pBody1) {
-	/*ADD*/		// get the two separating objects
-	/*ADD*/		GameObject* pObj0 = FindGameObject((btRigidBody*)pBody0);
-	/*ADD*/		GameObject* pObj1 = FindGameObject((btRigidBody*)pBody1);
-	/*ADD*/
-	/*ADD*/		// exit if we didn't find anything
-	/*ADD*/		if (!pObj0 || !pObj1) return;
-	/*ADD*/
-	/*ADD*/		// set their colors to black
-	/*ADD*/		pObj0->SetColor(btVector3(0.0, 0.0, 0.0));
-	/*ADD*/		pObj1->SetColor(btVector3(0.0, 0.0, 0.0));
-	/*ADD*/
+
+void BulletOpenGLApplication::SeparationEvent(btRigidBody* pBody0, btRigidBody* pBody1) {
+	/*REM*		// get the two separating objects							*/
+	/*REM*		GameObject* pObj0 = FindGameObject((btRigidBody*)pBody0);	*/
+	/*REM*		GameObject* pObj1 = FindGameObject((btRigidBody*)pBody1);	*/
+	/*REM*																	*/
+	/*REM*		// exit if we didn't find anything							*/
+	/*REM*		if (!pObj0 || !pObj1) return;								*/
+	/*REM*																	*/
+	/*REM*		// set their colors to black								*/
+	/*REM*		pObj0->SetColor(btVector3(0.0,0.0,0.0));					*/
+	/*REM*		pObj1->SetColor(btVector3(0.0,0.0,0.0));					*/
 }
-/*ADD*/
-/*ADD*/	GameObject* BulletOpenGLApplication::FindGameObject(btRigidBody* pBody) {
-	/*ADD*/		// search through our list of gameobjects finding
-	/*ADD*/		// the one with a rigid body that matches the given one
-	/*ADD*/		for (GameObjects::iterator iter = m_objects.begin(); iter != m_objects.end(); ++iter) {
-		/*ADD*/			if ((*iter)->GetRigidBody() == pBody) {
-			/*ADD*/				// found the body, so return the corresponding game object
-			/*ADD*/				return *iter;
-			/*ADD*/
+
+GameObject* BulletOpenGLApplication::FindGameObject(btRigidBody* pBody) {
+	// search through our list of gameobjects finding
+	// the one with a rigid body that matches the given one
+	for (GameObjects::iterator iter = m_objects.begin(); iter != m_objects.end(); ++iter) {
+		if ((*iter)->GetRigidBody() == pBody) {
+			// found the body, so return the corresponding game object
+			return *iter;
 		}
-		/*ADD*/
 	}
-	/*ADD*/		return 0;
-	/*ADD*/
+	return 0;
 }

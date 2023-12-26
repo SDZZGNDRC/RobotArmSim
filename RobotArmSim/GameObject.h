@@ -23,7 +23,7 @@ public:
 
 	btVector3 GetColor() { return m_color; }
 
-	/*ADD*/ void SetColor(const btVector3& color) { m_color = color; }
+	void SetColor(const btVector3& color) { m_color = color; }
 
 protected:
 	btCollisionShape* m_pShape;
