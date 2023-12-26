@@ -18,7 +18,9 @@ BulletOpenGLApplication::BulletOpenGLApplication()
 	m_pCollisionConfiguration(0),
 	m_pDispatcher(0),
 	m_pSolver(0),
-	m_pWorld(0)
+	m_pWorld(0),
+	/*ADD*/	m_pPickedBody(0),
+	/*ADD*/	m_pPickConstraint(0)
 {
 }
 
@@ -89,17 +91,17 @@ void BulletOpenGLApplication::Keyboard(unsigned char key, int x, int y) {
 		// toggle AABB debug drawing
 		m_pDebugDrawer->ToggleDebugFlag(btIDebugDraw::DBG_DrawAabb);
 		break;
-	/*ADD*/		case 'd':
-		/*ADD*/ {
-		/*ADD*/				// create a temp object to store the raycast result
-		/*ADD*/				RayResult result;
-		/*ADD*/				// perform the raycast
-		/*ADD*/				if (!Raycast(m_cameraPosition, GetPickingRay(x, y), result))
-			/*ADD*/					return; // return if the test failed
-		/*ADD*/				// destroy the corresponding game object
-		/*ADD*/				DestroyGameObject(result.pBody);
-		/*ADD*/				break;
-		/*ADD*/			}
+	case 'd':
+	{
+		// create a temp object to store the raycast result
+		RayResult result;
+		// perform the raycast
+		if (!Raycast(m_cameraPosition, GetPickingRay(x, y), result))
+			return; // return if the test failed
+		// destroy the corresponding game object
+		DestroyGameObject(result.pBody);
+		break;
+	}
 	}
 }
 
@@ -162,23 +164,55 @@ void BulletOpenGLApplication::Idle() {
 }
 
 void BulletOpenGLApplication::Mouse(int button, int state, int x, int y) {
-	/*ADD*/		switch (button) {
-	/*ADD*/		case 2: // right mouse button
+	switch (button) {
+	/*ADD*/		case 0:  // left mouse button
 		/*ADD*/ {
-		/*ADD*/				if (state == 0) { // pressed down
-			/*ADD*/					// shoot a box
-			/*ADD*/					ShootBox(GetPickingRay(x, y));
+		/*ADD*/				if (state == 0) { // button down
+			/*ADD*/					// create the picking constraint when we click the LMB
+			/*ADD*/					CreatePickingConstraint(x, y);
 			/*ADD*/
 		}
-		/*ADD*/
-		/*ADD*/			break;
+		else { // button up
+			/*ADD*/					// remove the picking constraint when we release the LMB
+			/*ADD*/					RemovePickingConstraint();
+			/*ADD*/
+		}
+		/*ADD*/				break;
 		/*ADD*/			}
-		/*ADD*/
+	case 2: // right mouse button
+	{
+		if (state == 0) { // pressed down
+			// shoot a box
+			ShootBox(GetPickingRay(x, y));
+		}
+
+		break;
+	}
 	}
 }
 
 void BulletOpenGLApplication::PassiveMotion(int x, int y) {}
-void BulletOpenGLApplication::Motion(int x, int y) {}
+
+void BulletOpenGLApplication::Motion(int x, int y) {
+	/*ADD*/		// did we pick a body with the LMB?
+	/*ADD*/		if (m_pPickedBody) {
+		/*ADD*/			btGeneric6DofConstraint* pickCon = static_cast<btGeneric6DofConstraint*>(m_pPickConstraint);
+		/*ADD*/			if (!pickCon)
+			/*ADD*/				return;
+		/*ADD*/
+		/*ADD*/			// use another picking ray to get the target direction
+		/*ADD*/			btVector3 dir = GetPickingRay(x, y) - m_cameraPosition;
+		/*ADD*/			dir.normalize();
+		/*ADD*/
+		/*ADD*/			// use the same distance as when we originally picked the object
+		/*ADD*/			dir *= m_oldPickingDist;
+		/*ADD*/			btVector3 newPivot = m_cameraPosition + dir;
+		/*ADD*/
+		/*ADD*/			// set the position of the constraint
+		/*ADD*/			pickCon->getFrameOffsetA().setOrigin(newPivot);
+		/*ADD*/
+	}
+}
 void BulletOpenGLApplication::Display() {}
 
 void BulletOpenGLApplication::UpdateCamera() {
@@ -293,9 +327,13 @@ void BulletOpenGLApplication::DrawBox(const btVector3& halfSize) {
 	for (int i = 0; i < 36; i += 3) {
 		// get the three vertices for the triangle based
 		// on the index values set above
-		btVector3 vert1 = vertices[indices[i]];
-		btVector3 vert2 = vertices[indices[i + 1]];
-		btVector3 vert3 = vertices[indices[i + 2]];
+		// use const references so we don't copy the object
+		// (a good rule of thumb is to never allocate/deallocate
+		// memory during *every* render/update call. This should 
+		// only happen sporadically)
+		const btVector3& vert1 = vertices[indices[i]];
+		const btVector3& vert2 = vertices[indices[i + 1]];
+		const btVector3& vert3 = vertices[indices[i + 2]];
 
 		// create a normal that is perpendicular to the 
 		// face (use the cross product)
@@ -412,117 +450,192 @@ GameObject* BulletOpenGLApplication::CreateGameObject(btCollisionShape* pShape, 
 	return pObject;
 }
 
-/*ADD*/	btVector3 BulletOpenGLApplication::GetPickingRay(int x, int y) {
-	/*ADD*/		// calculate the field-of-view
-	/*ADD*/		float tanFov = 1.0f / m_nearPlane;
-	/*ADD*/		float fov = btScalar(2.0) * btAtan(tanFov);
-	/*ADD*/
-	/*ADD*/		// get a ray pointing forward from the 
-	/*ADD*/		// camera and extend it to the far plane
-	/*ADD*/		btVector3 rayFrom = m_cameraPosition;
-	/*ADD*/		btVector3 rayForward = (m_cameraTarget - m_cameraPosition);
-	/*ADD*/		rayForward.normalize();
-	/*ADD*/		rayForward *= m_farPlane;
-	/*ADD*/
-	/*ADD*/		// find the horizontal and vertical vectors 
-	/*ADD*/		// relative to the current camera view
-	/*ADD*/		btVector3 ver = m_upVector;
-	/*ADD*/		btVector3 hor = rayForward.cross(ver);
-	/*ADD*/		hor.normalize();
-	/*ADD*/		ver = hor.cross(rayForward);
-	/*ADD*/		ver.normalize();
-	/*ADD*/		hor *= 2.f * m_farPlane * tanFov;
-	/*ADD*/		ver *= 2.f * m_farPlane * tanFov;
-	/*ADD*/
-	/*ADD*/		// calculate the aspect ratio
-	/*ADD*/		btScalar aspect = m_screenWidth / (btScalar)m_screenHeight;
-	/*ADD*/
-	/*ADD*/		// adjust the forward-ray based on
-	/*ADD*/		// the X/Y coordinates that were clicked
-	/*ADD*/		hor *= aspect;
-	/*ADD*/		btVector3 rayToCenter = rayFrom + rayForward;
-	/*ADD*/		btVector3 dHor = hor * 1.f / float(m_screenWidth);
-	/*ADD*/		btVector3 dVert = ver * 1.f / float(m_screenHeight);
-	/*ADD*/		btVector3 rayTo = rayToCenter - 0.5f * hor + 0.5f * ver;
-	/*ADD*/		rayTo += btScalar(x) * dHor;
-	/*ADD*/		rayTo -= btScalar(y) * dVert;
-	/*ADD*/
-	/*ADD*/		// return the final result
-	/*ADD*/		return rayTo;
-	/*ADD*/
+btVector3 BulletOpenGLApplication::GetPickingRay(int x, int y) {
+	// calculate the field-of-view
+	float tanFov = 1.0f / m_nearPlane;
+	float fov = btScalar(2.0) * btAtan(tanFov);
+
+	// get a ray pointing forward from the 
+	// camera and extend it to the far plane
+	btVector3 rayFrom = m_cameraPosition;
+	btVector3 rayForward = (m_cameraTarget - m_cameraPosition);
+	rayForward.normalize();
+	rayForward *= m_farPlane;
+
+	// find the horizontal and vertical vectors 
+	// relative to the current camera view
+	btVector3 ver = m_upVector;
+	btVector3 hor = rayForward.cross(ver);
+	hor.normalize();
+	ver = hor.cross(rayForward);
+	ver.normalize();
+	hor *= 2.f * m_farPlane * tanFov;
+	ver *= 2.f * m_farPlane * tanFov;
+
+	// calculate the aspect ratio
+	btScalar aspect = m_screenWidth / (btScalar)m_screenHeight;
+
+	// adjust the forward-ray based on
+	// the X/Y coordinates that were clicked
+	hor *= aspect;
+	btVector3 rayToCenter = rayFrom + rayForward;
+	btVector3 dHor = hor * 1.f / float(m_screenWidth);
+	btVector3 dVert = ver * 1.f / float(m_screenHeight);
+	btVector3 rayTo = rayToCenter - 0.5f * hor + 0.5f * ver;
+	rayTo += btScalar(x) * dHor;
+	rayTo -= btScalar(y) * dVert;
+
+	// return the final result
+	return rayTo;
 }
-/*ADD*/
-/*ADD*/	void BulletOpenGLApplication::ShootBox(const btVector3& direction) {
-	/*ADD*/		// create a new box object
-	/*ADD*/		GameObject* pObject = CreateGameObject(new btBoxShape(btVector3(1, 1, 1)), 1, btVector3(0.4f, 0.f, 0.4f), m_cameraPosition);
-	/*ADD*/
-	/*ADD*/		// calculate the velocity
-	/*ADD*/		btVector3 velocity = direction;
-	/*ADD*/		velocity.normalize();
-	/*ADD*/		velocity *= 25.0f;
-	/*ADD*/
-	/*ADD*/		// set the linear velocity of the box
-	/*ADD*/		pObject->GetRigidBody()->setLinearVelocity(velocity);
-	/*ADD*/
+
+void BulletOpenGLApplication::ShootBox(const btVector3& direction) {
+	// create a new box object
+	GameObject* pObject = CreateGameObject(new btBoxShape(btVector3(1, 1, 1)), 1, btVector3(0.4f, 0.f, 0.4f), m_cameraPosition);
+
+	// calculate the velocity
+	btVector3 velocity = direction;
+	velocity.normalize();
+	velocity *= 25.0f;
+
+	// set the linear velocity of the box
+	pObject->GetRigidBody()->setLinearVelocity(velocity);
 }
-/*ADD*/
-/*ADD*/	bool BulletOpenGLApplication::Raycast(const btVector3& startPosition, const btVector3& direction, RayResult& output) {
-	/*ADD*/		if (!m_pWorld)
-		/*ADD*/			return false;
-	/*ADD*/
-	/*ADD*/		// get the picking ray from where we clicked
-	/*ADD*/		btVector3 rayTo = direction;
-	/*ADD*/		btVector3 rayFrom = m_cameraPosition;
-	/*ADD*/
-	/*ADD*/		// create our raycast callback object
-	/*ADD*/		btCollisionWorld::ClosestRayResultCallback rayCallback(rayFrom, rayTo);
-	/*ADD*/
-	/*ADD*/		// perform the raycast
-	/*ADD*/		m_pWorld->rayTest(rayFrom, rayTo, rayCallback);
-	/*ADD*/
-	/*ADD*/		// did we hit something?
-	/*ADD*/		if (rayCallback.hasHit())
-		/*ADD*/ {
-		/*ADD*/			// if so, get the rigid body we hit
-		/*ADD*/			btRigidBody* pBody = (btRigidBody*)btRigidBody::upcast(rayCallback.m_collisionObject);
-		/*ADD*/			if (!pBody)
-			/*ADD*/				return false;
-		/*ADD*/
-		/*ADD*/			// prevent us from picking objects 
-		/*ADD*/			// like the ground plane
-		/*ADD*/			if (pBody->isStaticObject() || pBody->isKinematicObject())
-			/*ADD*/				return false;
-		/*ADD*/
-		/*ADD*/			// set the result data
-		/*ADD*/			output.pBody = pBody;
-		/*ADD*/			output.hitPoint = rayCallback.m_hitPointWorld;
-		/*ADD*/			return true;
-		/*ADD*/
+
+bool BulletOpenGLApplication::Raycast(const btVector3& startPosition, const btVector3& direction, RayResult& output) {
+	if (!m_pWorld)
+		return false;
+
+	// get the picking ray from where we clicked
+	btVector3 rayTo = direction;
+	btVector3 rayFrom = m_cameraPosition;
+
+	// create our raycast callback object
+	btCollisionWorld::ClosestRayResultCallback rayCallback(rayFrom, rayTo);
+
+	// perform the raycast
+	m_pWorld->rayTest(rayFrom, rayTo, rayCallback);
+
+	// did we hit something?
+	if (rayCallback.hasHit())
+	{
+		// if so, get the rigid body we hit
+		btRigidBody* pBody = (btRigidBody*)btRigidBody::upcast(rayCallback.m_collisionObject);
+		if (!pBody)
+			return false;
+
+		// prevent us from picking objects 
+		// like the ground plane
+		if (pBody->isStaticObject() || pBody->isKinematicObject())
+			return false;
+
+		// set the result data
+		output.pBody = pBody;
+		output.hitPoint = rayCallback.m_hitPointWorld;
+		return true;
 	}
-	/*ADD*/
-	/*ADD*/		// we didn't hit anything
-	/*ADD*/		return false;
-	/*ADD*/
+
+	// we didn't hit anything
+	return false;
 }
-/*ADD*/
-/*ADD*/	void BulletOpenGLApplication::DestroyGameObject(btRigidBody* pBody) {
-	/*ADD*/		// we need to search through the objects in order to 
-	/*ADD*/		// find the corresponding iterator (can only erase from 
-	/*ADD*/		// an std::vector by passing an iterator)
-	/*ADD*/		for (GameObjects::iterator iter = m_objects.begin(); iter != m_objects.end(); ++iter) {
-		/*ADD*/			if ((*iter)->GetRigidBody() == pBody) {
-			/*ADD*/				GameObject* pObject = *iter;
-			/*ADD*/				// remove the rigid body from the world
-			/*ADD*/				m_pWorld->removeRigidBody(pObject->GetRigidBody());
-			/*ADD*/				// erase the object from the list
-			/*ADD*/				m_objects.erase(iter);
-			/*ADD*/				// delete the object from memory
-			/*ADD*/				delete pObject;
-			/*ADD*/				// done
-			/*ADD*/				return;
-			/*ADD*/
+
+void BulletOpenGLApplication::DestroyGameObject(btRigidBody* pBody) {
+	// we need to search through the objects in order to 
+	// find the corresponding iterator (can only erase from 
+	// an std::vector by passing an iterator)
+	for (GameObjects::iterator iter = m_objects.begin(); iter != m_objects.end(); ++iter) {
+		if ((*iter)->GetRigidBody() == pBody) {
+			GameObject* pObject = *iter;
+			// remove the rigid body from the world
+			m_pWorld->removeRigidBody(pObject->GetRigidBody());
+			// erase the object from the list
+			m_objects.erase(iter);
+			// delete the object from memory
+			delete pObject;
+			// done
+			return;
 		}
+	}
+}
+
+/*ADD*/	void BulletOpenGLApplication::CreatePickingConstraint(int x, int y) {
+	/*ADD*/		if (!m_pWorld)
+		/*ADD*/			return;
+	/*ADD*/
+	/*ADD*/		// perform a raycast and return if it fails
+	/*ADD*/		RayResult output;
+	/*ADD*/		if (!Raycast(m_cameraPosition, GetPickingRay(x, y), output))
+		/*ADD*/			return;
+	/*ADD*/
+	/*ADD*/		// store the body for future reference
+	/*ADD*/		m_pPickedBody = output.pBody;
+	/*ADD*/
+	/*ADD*/		// prevent the picked object from falling asleep
+	/*ADD*/		m_pPickedBody->setActivationState(DISABLE_DEACTIVATION);
+	/*ADD*/
+	/*ADD*/		// get the hit position relative to the body we hit 
+	/*ADD*/		btVector3 localPivot = m_pPickedBody->getCenterOfMassTransform().inverse() * output.hitPoint;
+	/*ADD*/
+	/*ADD*/		// create a transform for the pivot point
+	/*ADD*/		btTransform pivot;
+	/*ADD*/		pivot.setIdentity();
+	/*ADD*/		pivot.setOrigin(localPivot);
+	/*ADD*/
+	/*ADD*/		// create our constraint object
+	/*ADD*/		btGeneric6DofConstraint* dof6 = new btGeneric6DofConstraint(*m_pPickedBody, pivot, true);
+	/*ADD*/		bool bLimitAngularMotion = true;
+	/*ADD*/		if (bLimitAngularMotion) {
+		/*ADD*/			dof6->setAngularLowerLimit(btVector3(0, 0, 0));
+		/*ADD*/			dof6->setAngularUpperLimit(btVector3(0, 0, 0));
 		/*ADD*/
 	}
+	/*ADD*/
+	/*ADD*/		// add the constraint to the world
+	/*ADD*/		m_pWorld->addConstraint(dof6, true);
+	/*ADD*/
+	/*ADD*/		// store a pointer to our constraint
+	/*ADD*/		m_pPickConstraint = dof6;
+	/*ADD*/
+	/*ADD*/		// define the 'strength' of our constraint (each axis)
+	/*ADD*/		float cfm = 0.5f;
+	/*ADD*/		dof6->setParam(BT_CONSTRAINT_STOP_CFM, cfm, 0);
+	/*ADD*/		dof6->setParam(BT_CONSTRAINT_STOP_CFM, cfm, 1);
+	/*ADD*/		dof6->setParam(BT_CONSTRAINT_STOP_CFM, cfm, 2);
+	/*ADD*/		dof6->setParam(BT_CONSTRAINT_STOP_CFM, cfm, 3);
+	/*ADD*/		dof6->setParam(BT_CONSTRAINT_STOP_CFM, cfm, 4);
+	/*ADD*/		dof6->setParam(BT_CONSTRAINT_STOP_CFM, cfm, 5);
+	/*ADD*/
+	/*ADD*/		// define the 'error reduction' of our constraint (each axis)
+	/*ADD*/		float erp = 0.5f;
+	/*ADD*/		dof6->setParam(BT_CONSTRAINT_STOP_ERP, erp, 0);
+	/*ADD*/		dof6->setParam(BT_CONSTRAINT_STOP_ERP, erp, 1);
+	/*ADD*/		dof6->setParam(BT_CONSTRAINT_STOP_ERP, erp, 2);
+	/*ADD*/		dof6->setParam(BT_CONSTRAINT_STOP_ERP, erp, 3);
+	/*ADD*/		dof6->setParam(BT_CONSTRAINT_STOP_ERP, erp, 4);
+	/*ADD*/		dof6->setParam(BT_CONSTRAINT_STOP_ERP, erp, 5);
+	/*ADD*/
+	/*ADD*/		// save this data for future reference
+	/*ADD*/		m_oldPickingDist = (output.hitPoint - m_cameraPosition).length();
+	/*ADD*/
+}
+/*ADD*/
+/*ADD*/	void BulletOpenGLApplication::RemovePickingConstraint() {
+	/*ADD*/		// exit in erroneous situations
+	/*ADD*/		if (!m_pPickConstraint || !m_pWorld)
+		/*ADD*/			return;
+	/*ADD*/
+	/*ADD*/		// remove the constraint from the world
+	/*ADD*/		m_pWorld->removeConstraint(m_pPickConstraint);
+	/*ADD*/
+	/*ADD*/		// delete the constraint object
+	/*ADD*/		delete m_pPickConstraint;
+	/*ADD*/
+	/*ADD*/		// reactivate the body
+	/*ADD*/		m_pPickedBody->forceActivationState(ACTIVE_TAG);
+	/*ADD*/		m_pPickedBody->setDeactivationTime(0.f);
+	/*ADD*/
+	/*ADD*/		// clear the pointers
+	/*ADD*/		m_pPickConstraint = 0;
+	/*ADD*/		m_pPickedBody = 0;
 	/*ADD*/
 }

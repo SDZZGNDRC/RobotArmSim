@@ -19,11 +19,10 @@
 // a convenient typedef to reference an STL vector of GameObjects
 typedef std::vector<GameObject*> GameObjects;
 
-/*ADD*/	// struct to store our raycasting results
-/*ADD*/	struct RayResult {
-	/*ADD*/		btRigidBody* pBody;
-	/*ADD*/		btVector3 hitPoint;
-	/*ADD*/
+// struct to store our raycasting results
+struct RayResult {
+	btRigidBody* pBody;
+	btVector3 hitPoint;
 };
 
 class BulletOpenGLApplication {
@@ -69,12 +68,16 @@ public:
 		const btVector3& initialPosition = btVector3(0.0f, 0.0f, 0.0f),
 		const btQuaternion& initialRotation = btQuaternion(0, 0, 1, 1));
 
-	/*ADD*/		void ShootBox(const btVector3& direction);
-	/*ADD*/		void DestroyGameObject(btRigidBody* pBody);
+	void ShootBox(const btVector3& direction);
+	void DestroyGameObject(btRigidBody* pBody);
 
-	/*ADD*/		// picking functions
-	/*ADD*/		btVector3 GetPickingRay(int x, int y);
-	/*ADD*/		bool Raycast(const btVector3& startPosition, const btVector3& direction, RayResult& output);
+	// picking functions
+	btVector3 GetPickingRay(int x, int y);
+	bool Raycast(const btVector3& startPosition, const btVector3& direction, RayResult& output);
+
+	/*ADD*/		// constraint functions
+	/*ADD*/		void CreatePickingConstraint(int x, int y);
+	/*ADD*/		void RemovePickingConstraint();
 
 protected:
 	// camera control
@@ -105,5 +108,11 @@ protected:
 
 	// debug renderer
 	DebugDrawer* m_pDebugDrawer;
+
+	/*ADD*/		// constraint variables
+	/*ADD*/		btRigidBody* m_pPickedBody;				// the body we picked up
+	/*ADD*/		btTypedConstraint* m_pPickConstraint;	// the constraint the body is attached to
+	/*ADD*/		btScalar m_oldPickingDist;				// the distance from the camera to the hit point (so we can move the object up, down, left and right from our view)
+
 };
 #endif
