@@ -10,8 +10,8 @@
 // include our custom Motion State object
 #include "OpenGLMotionState.h"
 
-/*ADD*/	// Our custom debug renderer
-/*ADD*/	#include "DebugDrawer.h"
+// Our custom debug renderer
+#include "DebugDrawer.h"
 
 #include "GameObject.h"
 #include <vector>
@@ -19,6 +19,12 @@
 // a convenient typedef to reference an STL vector of GameObjects
 typedef std::vector<GameObject*> GameObjects;
 
+/*ADD*/	// struct to store our raycasting results
+/*ADD*/	struct RayResult {
+	/*ADD*/		btRigidBody* pBody;
+	/*ADD*/		btVector3 hitPoint;
+	/*ADD*/
+};
 
 class BulletOpenGLApplication {
 public:
@@ -63,6 +69,13 @@ public:
 		const btVector3& initialPosition = btVector3(0.0f, 0.0f, 0.0f),
 		const btQuaternion& initialRotation = btQuaternion(0, 0, 1, 1));
 
+	/*ADD*/		void ShootBox(const btVector3& direction);
+	/*ADD*/		void DestroyGameObject(btRigidBody* pBody);
+
+	/*ADD*/		// picking functions
+	/*ADD*/		btVector3 GetPickingRay(int x, int y);
+	/*ADD*/		bool Raycast(const btVector3& startPosition, const btVector3& direction, RayResult& output);
+
 protected:
 	// camera control
 	btVector3 m_cameraPosition; // the camera's current position
@@ -90,7 +103,7 @@ protected:
 	// an array of our game objects
 	GameObjects m_objects;
 
-	/*ADD*/		// debug renderer
-	/*ADD*/		DebugDrawer* m_pDebugDrawer;
+	// debug renderer
+	DebugDrawer* m_pDebugDrawer;
 };
 #endif

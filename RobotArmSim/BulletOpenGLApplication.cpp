@@ -65,12 +65,12 @@ void BulletOpenGLApplication::Initialize() {
 	// initialize the physics system
 	InitializePhysics();
 
-	/*ADD*/		// create the debug drawer
-	/*ADD*/		m_pDebugDrawer = new DebugDrawer();
-	/*ADD*/		// set the initial debug level to 0
-	/*ADD*/		m_pDebugDrawer->setDebugMode(0);
-	/*ADD*/		// add the debug drawer to the world
-	/*ADD*/		m_pWorld->setDebugDrawer(m_pDebugDrawer);
+	// create the debug drawer
+	m_pDebugDrawer = new DebugDrawer();
+	// set the initial debug level to 0
+	m_pDebugDrawer->setDebugMode(0);
+	// add the debug drawer to the world
+	m_pWorld->setDebugDrawer(m_pDebugDrawer);
 }
 void BulletOpenGLApplication::Keyboard(unsigned char key, int x, int y) {
 	// This function is called by FreeGLUT whenever
@@ -80,15 +80,26 @@ void BulletOpenGLApplication::Keyboard(unsigned char key, int x, int y) {
 	case 'z': ZoomCamera(+CAMERA_STEP_SIZE); break;
 		// 'x' zoom out
 	case 'x': ZoomCamera(-CAMERA_STEP_SIZE); break;
-	/*ADD*/		case 'w':
-		/*ADD*/			// toggle wireframe debug drawing
-		/*ADD*/			m_pDebugDrawer->ToggleDebugFlag(btIDebugDraw::DBG_DrawWireframe);
-		/*ADD*/			break;
-		/*ADD*/
-	/*ADD*/		case 'b':
-		/*ADD*/			// toggle AABB debug drawing
-		/*ADD*/			m_pDebugDrawer->ToggleDebugFlag(btIDebugDraw::DBG_DrawAabb);
-		/*ADD*/			break;
+	case 'w':
+		// toggle wireframe debug drawing
+		m_pDebugDrawer->ToggleDebugFlag(btIDebugDraw::DBG_DrawWireframe);
+		break;
+
+	case 'b':
+		// toggle AABB debug drawing
+		m_pDebugDrawer->ToggleDebugFlag(btIDebugDraw::DBG_DrawAabb);
+		break;
+	/*ADD*/		case 'd':
+		/*ADD*/ {
+		/*ADD*/				// create a temp object to store the raycast result
+		/*ADD*/				RayResult result;
+		/*ADD*/				// perform the raycast
+		/*ADD*/				if (!Raycast(m_cameraPosition, GetPickingRay(x, y), result))
+			/*ADD*/					return; // return if the test failed
+		/*ADD*/				// destroy the corresponding game object
+		/*ADD*/				DestroyGameObject(result.pBody);
+		/*ADD*/				break;
+		/*ADD*/			}
 	}
 }
 
@@ -150,7 +161,22 @@ void BulletOpenGLApplication::Idle() {
 	glutSwapBuffers();
 }
 
-void BulletOpenGLApplication::Mouse(int button, int state, int x, int y) {}
+void BulletOpenGLApplication::Mouse(int button, int state, int x, int y) {
+	/*ADD*/		switch (button) {
+	/*ADD*/		case 2: // right mouse button
+		/*ADD*/ {
+		/*ADD*/				if (state == 0) { // pressed down
+			/*ADD*/					// shoot a box
+			/*ADD*/					ShootBox(GetPickingRay(x, y));
+			/*ADD*/
+		}
+		/*ADD*/
+		/*ADD*/			break;
+		/*ADD*/			}
+		/*ADD*/
+	}
+}
+
 void BulletOpenGLApplication::PassiveMotion(int x, int y) {}
 void BulletOpenGLApplication::Motion(int x, int y) {}
 void BulletOpenGLApplication::Display() {}
@@ -267,13 +293,9 @@ void BulletOpenGLApplication::DrawBox(const btVector3& halfSize) {
 	for (int i = 0; i < 36; i += 3) {
 		// get the three vertices for the triangle based
 		// on the index values set above
-		// use const references so we don't copy the object
-		// (a good rule of thumb is to never allocate/deallocate
-		// memory during *every* render/update call. This should 
-		// only happen sporadically)
-		const btVector3& vert1 = vertices[indices[i]];
-		const btVector3& vert2 = vertices[indices[i + 1]];
-		const btVector3& vert3 = vertices[indices[i + 2]];
+		btVector3 vert1 = vertices[indices[i]];
+		btVector3 vert2 = vertices[indices[i + 1]];
+		btVector3 vert3 = vertices[indices[i + 2]];
 
 		// create a normal that is perpendicular to the 
 		// face (use the cross product)
@@ -329,10 +351,10 @@ void BulletOpenGLApplication::RenderScene() {
 		DrawShape(transform, pObj->GetShape(), pObj->GetColor());
 	}
 
-	/*ADD*/		// after rendering all game objects, perform debug rendering
-	/*ADD*/		// Bullet will figure out what needs to be drawn then call to
-	/*ADD*/		// our DebugDrawer class to do the rendering for us
-	/*ADD*/		m_pWorld->debugDrawWorld();
+	// after rendering all game objects, perform debug rendering
+	// Bullet will figure out what needs to be drawn then call to
+	// our DebugDrawer class to do the rendering for us
+	m_pWorld->debugDrawWorld();
 }
 
 void BulletOpenGLApplication::UpdateScene(float dt) {
@@ -388,4 +410,119 @@ GameObject* BulletOpenGLApplication::CreateGameObject(btCollisionShape* pShape, 
 		m_pWorld->addRigidBody(pObject->GetRigidBody());
 	}
 	return pObject;
+}
+
+/*ADD*/	btVector3 BulletOpenGLApplication::GetPickingRay(int x, int y) {
+	/*ADD*/		// calculate the field-of-view
+	/*ADD*/		float tanFov = 1.0f / m_nearPlane;
+	/*ADD*/		float fov = btScalar(2.0) * btAtan(tanFov);
+	/*ADD*/
+	/*ADD*/		// get a ray pointing forward from the 
+	/*ADD*/		// camera and extend it to the far plane
+	/*ADD*/		btVector3 rayFrom = m_cameraPosition;
+	/*ADD*/		btVector3 rayForward = (m_cameraTarget - m_cameraPosition);
+	/*ADD*/		rayForward.normalize();
+	/*ADD*/		rayForward *= m_farPlane;
+	/*ADD*/
+	/*ADD*/		// find the horizontal and vertical vectors 
+	/*ADD*/		// relative to the current camera view
+	/*ADD*/		btVector3 ver = m_upVector;
+	/*ADD*/		btVector3 hor = rayForward.cross(ver);
+	/*ADD*/		hor.normalize();
+	/*ADD*/		ver = hor.cross(rayForward);
+	/*ADD*/		ver.normalize();
+	/*ADD*/		hor *= 2.f * m_farPlane * tanFov;
+	/*ADD*/		ver *= 2.f * m_farPlane * tanFov;
+	/*ADD*/
+	/*ADD*/		// calculate the aspect ratio
+	/*ADD*/		btScalar aspect = m_screenWidth / (btScalar)m_screenHeight;
+	/*ADD*/
+	/*ADD*/		// adjust the forward-ray based on
+	/*ADD*/		// the X/Y coordinates that were clicked
+	/*ADD*/		hor *= aspect;
+	/*ADD*/		btVector3 rayToCenter = rayFrom + rayForward;
+	/*ADD*/		btVector3 dHor = hor * 1.f / float(m_screenWidth);
+	/*ADD*/		btVector3 dVert = ver * 1.f / float(m_screenHeight);
+	/*ADD*/		btVector3 rayTo = rayToCenter - 0.5f * hor + 0.5f * ver;
+	/*ADD*/		rayTo += btScalar(x) * dHor;
+	/*ADD*/		rayTo -= btScalar(y) * dVert;
+	/*ADD*/
+	/*ADD*/		// return the final result
+	/*ADD*/		return rayTo;
+	/*ADD*/
+}
+/*ADD*/
+/*ADD*/	void BulletOpenGLApplication::ShootBox(const btVector3& direction) {
+	/*ADD*/		// create a new box object
+	/*ADD*/		GameObject* pObject = CreateGameObject(new btBoxShape(btVector3(1, 1, 1)), 1, btVector3(0.4f, 0.f, 0.4f), m_cameraPosition);
+	/*ADD*/
+	/*ADD*/		// calculate the velocity
+	/*ADD*/		btVector3 velocity = direction;
+	/*ADD*/		velocity.normalize();
+	/*ADD*/		velocity *= 25.0f;
+	/*ADD*/
+	/*ADD*/		// set the linear velocity of the box
+	/*ADD*/		pObject->GetRigidBody()->setLinearVelocity(velocity);
+	/*ADD*/
+}
+/*ADD*/
+/*ADD*/	bool BulletOpenGLApplication::Raycast(const btVector3& startPosition, const btVector3& direction, RayResult& output) {
+	/*ADD*/		if (!m_pWorld)
+		/*ADD*/			return false;
+	/*ADD*/
+	/*ADD*/		// get the picking ray from where we clicked
+	/*ADD*/		btVector3 rayTo = direction;
+	/*ADD*/		btVector3 rayFrom = m_cameraPosition;
+	/*ADD*/
+	/*ADD*/		// create our raycast callback object
+	/*ADD*/		btCollisionWorld::ClosestRayResultCallback rayCallback(rayFrom, rayTo);
+	/*ADD*/
+	/*ADD*/		// perform the raycast
+	/*ADD*/		m_pWorld->rayTest(rayFrom, rayTo, rayCallback);
+	/*ADD*/
+	/*ADD*/		// did we hit something?
+	/*ADD*/		if (rayCallback.hasHit())
+		/*ADD*/ {
+		/*ADD*/			// if so, get the rigid body we hit
+		/*ADD*/			btRigidBody* pBody = (btRigidBody*)btRigidBody::upcast(rayCallback.m_collisionObject);
+		/*ADD*/			if (!pBody)
+			/*ADD*/				return false;
+		/*ADD*/
+		/*ADD*/			// prevent us from picking objects 
+		/*ADD*/			// like the ground plane
+		/*ADD*/			if (pBody->isStaticObject() || pBody->isKinematicObject())
+			/*ADD*/				return false;
+		/*ADD*/
+		/*ADD*/			// set the result data
+		/*ADD*/			output.pBody = pBody;
+		/*ADD*/			output.hitPoint = rayCallback.m_hitPointWorld;
+		/*ADD*/			return true;
+		/*ADD*/
+	}
+	/*ADD*/
+	/*ADD*/		// we didn't hit anything
+	/*ADD*/		return false;
+	/*ADD*/
+}
+/*ADD*/
+/*ADD*/	void BulletOpenGLApplication::DestroyGameObject(btRigidBody* pBody) {
+	/*ADD*/		// we need to search through the objects in order to 
+	/*ADD*/		// find the corresponding iterator (can only erase from 
+	/*ADD*/		// an std::vector by passing an iterator)
+	/*ADD*/		for (GameObjects::iterator iter = m_objects.begin(); iter != m_objects.end(); ++iter) {
+		/*ADD*/			if ((*iter)->GetRigidBody() == pBody) {
+			/*ADD*/				GameObject* pObject = *iter;
+			/*ADD*/				// remove the rigid body from the world
+			/*ADD*/				m_pWorld->removeRigidBody(pObject->GetRigidBody());
+			/*ADD*/				// erase the object from the list
+			/*ADD*/				m_objects.erase(iter);
+			/*ADD*/				// delete the object from memory
+			/*ADD*/				delete pObject;
+			/*ADD*/				// done
+			/*ADD*/				return;
+			/*ADD*/
+		}
+		/*ADD*/
+	}
+	/*ADD*/
 }
