@@ -1,19 +1,17 @@
-/*ADD*/	#ifndef _OPENGLMOTIONSTATE_H_
-/*ADD*/	#define _OPENGLMOTIONSTATE_H_
-/*ADD*/
-/*ADD*/	#include "btBulletCollisionCommon.h"
-/*ADD*/
-/*ADD*/	class OpenGLMotionState : public btDefaultMotionState {
-/*ADD*/	public:
-	/*ADD*/		OpenGLMotionState(const btTransform& transform) : btDefaultMotionState(transform) {}
-	/*ADD*/
-	/*ADD*/		void GetWorldTransform(btScalar* transform) {
-		/*ADD*/			btTransform trans;
-		/*ADD*/			getWorldTransform(trans);
-		/*ADD*/			trans.getOpenGLMatrix(transform);
-		/*ADD*/
+#ifndef _OPENGLMOTIONSTATE_H_
+#define _OPENGLMOTIONSTATE_H_
+
+#include "btBulletCollisionCommon.h"
+
+class OpenGLMotionState : public btDefaultMotionState {
+public:
+	OpenGLMotionState(const btTransform& transform) : btDefaultMotionState(transform) {}
+
+	void GetWorldTransform(btScalar* transform) {
+		btTransform trans;
+		getWorldTransform(trans);
+		trans.getOpenGLMatrix(transform);
 	}
-	/*ADD*/
 };
-/*ADD*/
-/*ADD*/	#endif
+
+#endif

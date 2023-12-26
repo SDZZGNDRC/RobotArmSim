@@ -141,6 +141,7 @@
   <ItemGroup>
     <ClCompile Include="BasicDemo.cpp" />
     <ClCompile Include="BulletOpenGLApplication.cpp" />
+    <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="OpenGLMotionState.h" />
   </ItemGroup>
@@ -148,6 +149,7 @@
     <ClInclude Include="BasicDemo.h" />
     <ClInclude Include="BulletOpenGLApplication.h" />
     <ClInclude Include="FreeGLUTCallbacks.h" />
+    <ClInclude Include="GameObject.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

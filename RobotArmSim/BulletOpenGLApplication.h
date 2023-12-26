@@ -7,8 +7,15 @@
 
 #include "BulletDynamics/Dynamics/btDynamicsWorld.h"
 
-/*ADD*/	// include our custom Motion State object
-/*ADD*/	#include "OpenGLMotionState.h"
+// include our custom Motion State object
+#include "OpenGLMotionState.h"
+
+/*ADD*/	#include "GameObject.h"
+/*ADD*/	#include <vector>
+/*ADD*/
+/*ADD*/	// a convenient typedef to reference an STL vector of GameObjects
+/*ADD*/	typedef std::vector<GameObject*> GameObjects;
+
 
 class BulletOpenGLApplication {
 public:
@@ -27,11 +34,11 @@ public:
 	virtual void Motion(int x, int y);
 	virtual void Display();
 
-	/*ADD*/		// rendering. Can be overrideen by derived classes
-	/*ADD*/		virtual void RenderScene();
-	/*ADD*/
-	/*ADD*/		// scene updating. Can be overridden by derived classes
-	/*ADD*/		virtual void UpdateScene(float dt);
+	// rendering. Can be overrideen by derived classes
+	virtual void RenderScene();
+
+	// scene updating. Can be overridden by derived classes
+	virtual void UpdateScene(float dt);
 
 	// physics functions. Can be overrideen by derived classes (like BasicDemo)
 	virtual void InitializePhysics() {};
@@ -43,7 +50,15 @@ public:
 	void ZoomCamera(float distance);
 
 	// drawing functions
-	void DrawBox(btScalar* transform, const btVector3& halfSize, const btVector3& color = btVector3(1.0f, 1.0f, 1.0f));
+	void DrawBox(const btVector3& halfSize);
+	/*ADD*/		void DrawShape(btScalar* transform, const btCollisionShape* pShape, const btVector3& color);
+	/*ADD*/
+	/*ADD*/		// object functions
+	/*ADD*/		GameObject* CreateGameObject(btCollisionShape* pShape,
+		/*ADD*/				const float& mass,
+		/*ADD*/				const btVector3& color = btVector3(1.0f, 1.0f, 1.0f),
+		/*ADD*/				const btVector3& initialPosition = btVector3(0.0f, 0.0f, 0.0f),
+		/*ADD*/				const btQuaternion& initialRotation = btQuaternion(0, 0, 1, 1));
 
 protected:
 	// camera control
@@ -66,11 +81,13 @@ protected:
 	btConstraintSolver* m_pSolver;
 	btDynamicsWorld* m_pWorld;
 
-	/*ADD*/		// our custom motion state
-	/*ADD*/		OpenGLMotionState* m_pMotionState;
-	/*ADD*/
-	/*ADD*/		// a simple clock for counting time
-	/*ADD*/		btClock m_clock;
+	/*REM*	// our custom motion state **/
+	/*REM*	OpenGLMotionState* m_pMotionState; **/
 
+		// a simple clock for counting time
+	btClock m_clock;
+
+	/*ADD*/		// an array of our game objects
+	/*ADD*/		GameObjects m_objects;
 };
 #endif

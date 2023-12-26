@@ -5,5 +5,5 @@ public:
 	virtual void InitializePhysics() override;
 	virtual void ShutdownPhysics() override;
 
-	/*ADD*/		void CreateObjects();
+	void CreateObjects();
 };
