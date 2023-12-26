@@ -10,11 +10,14 @@
 // include our custom Motion State object
 #include "OpenGLMotionState.h"
 
-/*ADD*/	#include "GameObject.h"
-/*ADD*/	#include <vector>
-/*ADD*/
-/*ADD*/	// a convenient typedef to reference an STL vector of GameObjects
-/*ADD*/	typedef std::vector<GameObject*> GameObjects;
+/*ADD*/	// Our custom debug renderer
+/*ADD*/	#include "DebugDrawer.h"
+
+#include "GameObject.h"
+#include <vector>
+
+// a convenient typedef to reference an STL vector of GameObjects
+typedef std::vector<GameObject*> GameObjects;
 
 
 class BulletOpenGLApplication {
@@ -51,14 +54,14 @@ public:
 
 	// drawing functions
 	void DrawBox(const btVector3& halfSize);
-	/*ADD*/		void DrawShape(btScalar* transform, const btCollisionShape* pShape, const btVector3& color);
-	/*ADD*/
-	/*ADD*/		// object functions
-	/*ADD*/		GameObject* CreateGameObject(btCollisionShape* pShape,
-		/*ADD*/				const float& mass,
-		/*ADD*/				const btVector3& color = btVector3(1.0f, 1.0f, 1.0f),
-		/*ADD*/				const btVector3& initialPosition = btVector3(0.0f, 0.0f, 0.0f),
-		/*ADD*/				const btQuaternion& initialRotation = btQuaternion(0, 0, 1, 1));
+	void DrawShape(btScalar* transform, const btCollisionShape* pShape, const btVector3& color);
+
+	// object functions
+	GameObject* CreateGameObject(btCollisionShape* pShape,
+		const float& mass,
+		const btVector3& color = btVector3(1.0f, 1.0f, 1.0f),
+		const btVector3& initialPosition = btVector3(0.0f, 0.0f, 0.0f),
+		const btQuaternion& initialRotation = btQuaternion(0, 0, 1, 1));
 
 protected:
 	// camera control
@@ -81,13 +84,13 @@ protected:
 	btConstraintSolver* m_pSolver;
 	btDynamicsWorld* m_pWorld;
 
-	/*REM*	// our custom motion state **/
-	/*REM*	OpenGLMotionState* m_pMotionState; **/
-
-		// a simple clock for counting time
+	// a simple clock for counting time
 	btClock m_clock;
 
-	/*ADD*/		// an array of our game objects
-	/*ADD*/		GameObjects m_objects;
+	// an array of our game objects
+	GameObjects m_objects;
+
+	/*ADD*/		// debug renderer
+	/*ADD*/		DebugDrawer* m_pDebugDrawer;
 };
 #endif

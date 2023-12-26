@@ -19,7 +19,6 @@ BulletOpenGLApplication::BulletOpenGLApplication()
 	m_pDispatcher(0),
 	m_pSolver(0),
 	m_pWorld(0)
-	/*REM*	m_pMotionState(0) **/
 {
 }
 
@@ -65,6 +64,13 @@ void BulletOpenGLApplication::Initialize() {
 
 	// initialize the physics system
 	InitializePhysics();
+
+	/*ADD*/		// create the debug drawer
+	/*ADD*/		m_pDebugDrawer = new DebugDrawer();
+	/*ADD*/		// set the initial debug level to 0
+	/*ADD*/		m_pDebugDrawer->setDebugMode(0);
+	/*ADD*/		// add the debug drawer to the world
+	/*ADD*/		m_pWorld->setDebugDrawer(m_pDebugDrawer);
 }
 void BulletOpenGLApplication::Keyboard(unsigned char key, int x, int y) {
 	// This function is called by FreeGLUT whenever
@@ -74,6 +80,15 @@ void BulletOpenGLApplication::Keyboard(unsigned char key, int x, int y) {
 	case 'z': ZoomCamera(+CAMERA_STEP_SIZE); break;
 		// 'x' zoom out
 	case 'x': ZoomCamera(-CAMERA_STEP_SIZE); break;
+	/*ADD*/		case 'w':
+		/*ADD*/			// toggle wireframe debug drawing
+		/*ADD*/			m_pDebugDrawer->ToggleDebugFlag(btIDebugDraw::DBG_DrawWireframe);
+		/*ADD*/			break;
+		/*ADD*/
+	/*ADD*/		case 'b':
+		/*ADD*/			// toggle AABB debug drawing
+		/*ADD*/			m_pDebugDrawer->ToggleDebugFlag(btIDebugDraw::DBG_DrawAabb);
+		/*ADD*/			break;
 	}
 }
 
@@ -209,21 +224,13 @@ void BulletOpenGLApplication::UpdateCamera() {
 	// the view matrix is now set
 }
 
-/*REM*void BulletOpenGLApplication::DrawBox(btScalar* transform , const btVector3 &halfSize, const btVector3 &color) { **/
-/*ADD*/ void BulletOpenGLApplication::DrawBox(const btVector3& halfSize) {
-
-	/*REM*	// push the transform onto the stack **/
-	/*REM*	glPushMatrix(); **/
-	/*REM*	glMultMatrixf(transform); **/
+void BulletOpenGLApplication::DrawBox(const btVector3& halfSize) {
 
 	float halfWidth = halfSize.x();
 	float halfHeight = halfSize.y();
 	float halfDepth = halfSize.z();
 
-	/*REM*	// set the object's color **/
-	/*REM*	glColor3f(color.x(), color.y(), color.z()); **/
-
-		// create the vertex positions
+	// create the vertex positions
 	btVector3 vertices[8] = {
 	btVector3(halfWidth,halfHeight,halfDepth),
 	btVector3(-halfWidth,halfHeight,halfDepth),
@@ -284,10 +291,6 @@ void BulletOpenGLApplication::UpdateCamera() {
 
 	// stop processing vertices
 	glEnd();
-
-	/*REM*	// pop the transform from the stack in preparation **/
-	/*REM*	// for the next object **/
-	/*REM*	glPopMatrix(); **/
 }
 
 void BulletOpenGLApplication::RotateCamera(float& angle, float value) {
@@ -325,6 +328,11 @@ void BulletOpenGLApplication::RenderScene() {
 		// get data from the object and draw it
 		DrawShape(transform, pObj->GetShape(), pObj->GetColor());
 	}
+
+	/*ADD*/		// after rendering all game objects, perform debug rendering
+	/*ADD*/		// Bullet will figure out what needs to be drawn then call to
+	/*ADD*/		// our DebugDrawer class to do the rendering for us
+	/*ADD*/		m_pWorld->debugDrawWorld();
 }
 
 void BulletOpenGLApplication::UpdateScene(float dt) {
@@ -337,51 +345,47 @@ void BulletOpenGLApplication::UpdateScene(float dt) {
 	}
 }
 
-/*ADD*/	void BulletOpenGLApplication::DrawShape(btScalar* transform, const btCollisionShape* pShape, const btVector3& color) {
-	/*ADD*/		// set the color
-	/*ADD*/		glColor3f(color.x(), color.y(), color.z());
-	/*ADD*/
-	/*ADD*/		// push the matrix stack
-	/*ADD*/		glPushMatrix();
-	/*ADD*/		glMultMatrixf(transform);
-	/*ADD*/
-	/*ADD*/		// make a different draw call based on the object type
-	/*ADD*/		switch (pShape->getShapeType()) {
-		/*ADD*/			// an internal enum used by Bullet for boxes
-	/*ADD*/		case BOX_SHAPE_PROXYTYPE:
-		/*ADD*/ {
-		/*ADD*/			// assume the shape is a box, and typecast it
-		/*ADD*/			const btBoxShape* box = static_cast<const btBoxShape*>(pShape);
-		/*ADD*/			// get the 'halfSize' of the box
-		/*ADD*/			btVector3 halfSize = box->getHalfExtentsWithMargin();
-		/*ADD*/			// draw the box
-		/*ADD*/			DrawBox(halfSize);
-		/*ADD*/			break;
-		/*ADD*/		}
-	/*ADD*/		default:
-		/*ADD*/			// unsupported type
-		/*ADD*/			break;
-		/*ADD*/
+void BulletOpenGLApplication::DrawShape(btScalar* transform, const btCollisionShape* pShape, const btVector3& color) {
+	// set the color
+	glColor3f(color.x(), color.y(), color.z());
+
+	// push the matrix stack
+	glPushMatrix();
+	glMultMatrixf(transform);
+
+	// make a different draw call based on the object type
+	switch (pShape->getShapeType()) {
+		// an internal enum used by Bullet for boxes
+	case BOX_SHAPE_PROXYTYPE:
+	{
+		// assume the shape is a box, and typecast it
+		const btBoxShape* box = static_cast<const btBoxShape*>(pShape);
+		// get the 'halfSize' of the box
+		btVector3 halfSize = box->getHalfExtentsWithMargin();
+		// draw the box
+		DrawBox(halfSize);
+		break;
 	}
-	/*ADD*/
-	/*ADD*/		// pop the stack
-	/*ADD*/		glPopMatrix();
-	/*ADD*/
+	default:
+		// unsupported type
+		break;
+	}
+
+	// pop the stack
+	glPopMatrix();
 }
-/*ADD*/
-/*ADD*/	GameObject* BulletOpenGLApplication::CreateGameObject(btCollisionShape* pShape, const float& mass, const btVector3& color, const btVector3& initialPosition, const btQuaternion& initialRotation) {
-	/*ADD*/		// create a new game object
-	/*ADD*/		GameObject* pObject = new GameObject(pShape, mass, color, initialPosition, initialRotation);
-	/*ADD*/
-	/*ADD*/		// push it to the back of the list
-	/*ADD*/		m_objects.push_back(pObject);
-	/*ADD*/
-	/*ADD*/		// check if the world object is valid
-	/*ADD*/		if (m_pWorld) {
-		/*ADD*/			// add the object's rigid body to the world
-		/*ADD*/			m_pWorld->addRigidBody(pObject->GetRigidBody());
-		/*ADD*/
+
+GameObject* BulletOpenGLApplication::CreateGameObject(btCollisionShape* pShape, const float& mass, const btVector3& color, const btVector3& initialPosition, const btQuaternion& initialRotation) {
+	// create a new game object
+	GameObject* pObject = new GameObject(pShape, mass, color, initialPosition, initialRotation);
+
+	// push it to the back of the list
+	m_objects.push_back(pObject);
+
+	// check if the world object is valid
+	if (m_pWorld) {
+		// add the object's rigid body to the world
+		m_pWorld->addRigidBody(pObject->GetRigidBody());
 	}
-	/*ADD*/		return pObject;
-	/*ADD*/
+	return pObject;
 }
