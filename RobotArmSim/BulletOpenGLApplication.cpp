@@ -19,8 +19,8 @@ BulletOpenGLApplication::BulletOpenGLApplication()
 	m_pDispatcher(0),
 	m_pSolver(0),
 	m_pWorld(0),
-	/*ADD*/	m_pPickedBody(0),
-	/*ADD*/	m_pPickConstraint(0)
+	m_pPickedBody(0),
+	m_pPickConstraint(0)
 {
 }
 
@@ -165,20 +165,18 @@ void BulletOpenGLApplication::Idle() {
 
 void BulletOpenGLApplication::Mouse(int button, int state, int x, int y) {
 	switch (button) {
-	/*ADD*/		case 0:  // left mouse button
-		/*ADD*/ {
-		/*ADD*/				if (state == 0) { // button down
-			/*ADD*/					// create the picking constraint when we click the LMB
-			/*ADD*/					CreatePickingConstraint(x, y);
-			/*ADD*/
+	case 0:  // left mouse button
+	{
+		if (state == 0) { // button down
+			// create the picking constraint when we click the LMB
+			CreatePickingConstraint(x, y);
 		}
 		else { // button up
-			/*ADD*/					// remove the picking constraint when we release the LMB
-			/*ADD*/					RemovePickingConstraint();
-			/*ADD*/
+			// remove the picking constraint when we release the LMB
+			RemovePickingConstraint();
 		}
-		/*ADD*/				break;
-		/*ADD*/			}
+		break;
+	}
 	case 2: // right mouse button
 	{
 		if (state == 0) { // pressed down
@@ -194,23 +192,22 @@ void BulletOpenGLApplication::Mouse(int button, int state, int x, int y) {
 void BulletOpenGLApplication::PassiveMotion(int x, int y) {}
 
 void BulletOpenGLApplication::Motion(int x, int y) {
-	/*ADD*/		// did we pick a body with the LMB?
-	/*ADD*/		if (m_pPickedBody) {
-		/*ADD*/			btGeneric6DofConstraint* pickCon = static_cast<btGeneric6DofConstraint*>(m_pPickConstraint);
-		/*ADD*/			if (!pickCon)
-			/*ADD*/				return;
-		/*ADD*/
-		/*ADD*/			// use another picking ray to get the target direction
-		/*ADD*/			btVector3 dir = GetPickingRay(x, y) - m_cameraPosition;
-		/*ADD*/			dir.normalize();
-		/*ADD*/
-		/*ADD*/			// use the same distance as when we originally picked the object
-		/*ADD*/			dir *= m_oldPickingDist;
-		/*ADD*/			btVector3 newPivot = m_cameraPosition + dir;
-		/*ADD*/
-		/*ADD*/			// set the position of the constraint
-		/*ADD*/			pickCon->getFrameOffsetA().setOrigin(newPivot);
-		/*ADD*/
+	// did we pick a body with the LMB?
+	if (m_pPickedBody) {
+		btGeneric6DofConstraint* pickCon = static_cast<btGeneric6DofConstraint*>(m_pPickConstraint);
+		if (!pickCon)
+			return;
+
+		// use another picking ray to get the target direction
+		btVector3 dir = GetPickingRay(x, y) - m_cameraPosition;
+		dir.normalize();
+
+		// use the same distance as when we originally picked the object
+		dir *= m_oldPickingDist;
+		btVector3 newPivot = m_cameraPosition + dir;
+
+		// set the position of the constraint
+		pickCon->getFrameOffsetA().setOrigin(newPivot);
 	}
 }
 void BulletOpenGLApplication::Display() {}
@@ -402,6 +399,9 @@ void BulletOpenGLApplication::UpdateScene(float dt) {
 		// every update and the amount of elasped time was 
 		// determined back in ::Idle() by our clock object.
 		m_pWorld->stepSimulation(dt);
+
+		/*ADD*/			// check for any new collisions/separations
+		/*ADD*/			CheckForCollisionEvents();
 	}
 }
 
@@ -558,84 +558,192 @@ void BulletOpenGLApplication::DestroyGameObject(btRigidBody* pBody) {
 	}
 }
 
-/*ADD*/	void BulletOpenGLApplication::CreatePickingConstraint(int x, int y) {
-	/*ADD*/		if (!m_pWorld)
-		/*ADD*/			return;
+void BulletOpenGLApplication::CreatePickingConstraint(int x, int y) {
+	if (!m_pWorld)
+		return;
+
+	// perform a raycast and return if it fails
+	RayResult output;
+	if (!Raycast(m_cameraPosition, GetPickingRay(x, y), output))
+		return;
+
+	// store the body for future reference
+	m_pPickedBody = output.pBody;
+
+	// prevent the picked object from falling asleep
+	m_pPickedBody->setActivationState(DISABLE_DEACTIVATION);
+
+	// get the hit position relative to the body we hit 
+	btVector3 localPivot = m_pPickedBody->getCenterOfMassTransform().inverse() * output.hitPoint;
+
+	// create a transform for the pivot point
+	btTransform pivot;
+	pivot.setIdentity();
+	pivot.setOrigin(localPivot);
+
+	// create our constraint object
+	btGeneric6DofConstraint* dof6 = new btGeneric6DofConstraint(*m_pPickedBody, pivot, true);
+	bool bLimitAngularMotion = true;
+	if (bLimitAngularMotion) {
+		dof6->setAngularLowerLimit(btVector3(0, 0, 0));
+		dof6->setAngularUpperLimit(btVector3(0, 0, 0));
+	}
+
+	// add the constraint to the world
+	m_pWorld->addConstraint(dof6, true);
+
+	// store a pointer to our constraint
+	m_pPickConstraint = dof6;
+
+	// define the 'strength' of our constraint (each axis)
+	float cfm = 0.5f;
+	dof6->setParam(BT_CONSTRAINT_STOP_CFM, cfm, 0);
+	dof6->setParam(BT_CONSTRAINT_STOP_CFM, cfm, 1);
+	dof6->setParam(BT_CONSTRAINT_STOP_CFM, cfm, 2);
+	dof6->setParam(BT_CONSTRAINT_STOP_CFM, cfm, 3);
+	dof6->setParam(BT_CONSTRAINT_STOP_CFM, cfm, 4);
+	dof6->setParam(BT_CONSTRAINT_STOP_CFM, cfm, 5);
+
+	// define the 'error reduction' of our constraint (each axis)
+	float erp = 0.5f;
+	dof6->setParam(BT_CONSTRAINT_STOP_ERP, erp, 0);
+	dof6->setParam(BT_CONSTRAINT_STOP_ERP, erp, 1);
+	dof6->setParam(BT_CONSTRAINT_STOP_ERP, erp, 2);
+	dof6->setParam(BT_CONSTRAINT_STOP_ERP, erp, 3);
+	dof6->setParam(BT_CONSTRAINT_STOP_ERP, erp, 4);
+	dof6->setParam(BT_CONSTRAINT_STOP_ERP, erp, 5);
+
+	// save this data for future reference
+	m_oldPickingDist = (output.hitPoint - m_cameraPosition).length();
+}
+
+void BulletOpenGLApplication::RemovePickingConstraint() {
+	// exit in erroneous situations
+	if (!m_pPickConstraint || !m_pWorld)
+		return;
+
+	// remove the constraint from the world
+	m_pWorld->removeConstraint(m_pPickConstraint);
+
+	// delete the constraint object
+	delete m_pPickConstraint;
+
+	// reactivate the body
+	m_pPickedBody->forceActivationState(ACTIVE_TAG);
+	m_pPickedBody->setDeactivationTime(0.f);
+
+	// clear the pointers
+	m_pPickConstraint = 0;
+	m_pPickedBody = 0;
+}
+
+/*ADD*/	void BulletOpenGLApplication::CheckForCollisionEvents() {
+	/*ADD*/		// keep a list of the collision pairs we
+	/*ADD*/		// found during the current update
+	/*ADD*/		CollisionPairs pairsThisUpdate;
 	/*ADD*/
-	/*ADD*/		// perform a raycast and return if it fails
-	/*ADD*/		RayResult output;
-	/*ADD*/		if (!Raycast(m_cameraPosition, GetPickingRay(x, y), output))
-		/*ADD*/			return;
-	/*ADD*/
-	/*ADD*/		// store the body for future reference
-	/*ADD*/		m_pPickedBody = output.pBody;
-	/*ADD*/
-	/*ADD*/		// prevent the picked object from falling asleep
-	/*ADD*/		m_pPickedBody->setActivationState(DISABLE_DEACTIVATION);
-	/*ADD*/
-	/*ADD*/		// get the hit position relative to the body we hit 
-	/*ADD*/		btVector3 localPivot = m_pPickedBody->getCenterOfMassTransform().inverse() * output.hitPoint;
-	/*ADD*/
-	/*ADD*/		// create a transform for the pivot point
-	/*ADD*/		btTransform pivot;
-	/*ADD*/		pivot.setIdentity();
-	/*ADD*/		pivot.setOrigin(localPivot);
-	/*ADD*/
-	/*ADD*/		// create our constraint object
-	/*ADD*/		btGeneric6DofConstraint* dof6 = new btGeneric6DofConstraint(*m_pPickedBody, pivot, true);
-	/*ADD*/		bool bLimitAngularMotion = true;
-	/*ADD*/		if (bLimitAngularMotion) {
-		/*ADD*/			dof6->setAngularLowerLimit(btVector3(0, 0, 0));
-		/*ADD*/			dof6->setAngularUpperLimit(btVector3(0, 0, 0));
+	/*ADD*/		// iterate through all of the manifolds in the dispatcher
+	/*ADD*/		for (int i = 0; i < m_pDispatcher->getNumManifolds(); ++i) {
+		/*ADD*/
+		/*ADD*/			// get the manifold
+		/*ADD*/			btPersistentManifold* pManifold = m_pDispatcher->getManifoldByIndexInternal(i);
+		/*ADD*/
+		/*ADD*/			// ignore manifolds that have 
+		/*ADD*/			// no contact points.
+		/*ADD*/			if (pManifold->getNumContacts() > 0) {
+			/*ADD*/				// get the two rigid bodies involved in the collision
+			/*ADD*/				const btRigidBody* pBody0 = static_cast<const btRigidBody*>(pManifold->getBody0());
+			/*ADD*/				const btRigidBody* pBody1 = static_cast<const btRigidBody*>(pManifold->getBody1());
+			/*ADD*/
+			/*ADD*/				// always create the pair in a predictable order
+			/*ADD*/				// (use the pointer value..)
+			/*ADD*/				bool const swapped = pBody0 > pBody1;
+			/*ADD*/				const btRigidBody* pSortedBodyA = swapped ? pBody1 : pBody0;
+			/*ADD*/				const btRigidBody* pSortedBodyB = swapped ? pBody0 : pBody1;
+			/*ADD*/
+			/*ADD*/				// create the pair
+			/*ADD*/				CollisionPair thisPair = std::make_pair(pSortedBodyA, pSortedBodyB);
+			/*ADD*/
+			/*ADD*/				// insert the pair into the current list
+			/*ADD*/				pairsThisUpdate.insert(thisPair);
+			/*ADD*/
+			/*ADD*/				// if this pair doesn't exist in the list
+			/*ADD*/				// from the previous update, it is a new
+			/*ADD*/				// pair and we must send a collision event
+			/*ADD*/				if (m_pairsLastUpdate.find(thisPair) == m_pairsLastUpdate.end()) {
+				/*ADD*/					CollisionEvent((btRigidBody*)pBody0, (btRigidBody*)pBody1);
+				/*ADD*/
+			}
+			/*ADD*/
+		}
 		/*ADD*/
 	}
 	/*ADD*/
-	/*ADD*/		// add the constraint to the world
-	/*ADD*/		m_pWorld->addConstraint(dof6, true);
+	/*ADD*/		// create another list for pairs that
+	/*ADD*/		// were removed this update
+	/*ADD*/		CollisionPairs removedPairs;
 	/*ADD*/
-	/*ADD*/		// store a pointer to our constraint
-	/*ADD*/		m_pPickConstraint = dof6;
+	/*ADD*/		// this handy function gets the difference beween
+	/*ADD*/		// two sets. It takes the difference between
+	/*ADD*/		// collision pairs from the last update, and this 
+	/*ADD*/		// update and pushes them into the removed pairs list
+	/*ADD*/		std::set_difference(m_pairsLastUpdate.begin(), m_pairsLastUpdate.end(),
+		/*ADD*/		pairsThisUpdate.begin(), pairsThisUpdate.end(),
+		/*ADD*/		std::inserter(removedPairs, removedPairs.begin()));
 	/*ADD*/
-	/*ADD*/		// define the 'strength' of our constraint (each axis)
-	/*ADD*/		float cfm = 0.5f;
-	/*ADD*/		dof6->setParam(BT_CONSTRAINT_STOP_CFM, cfm, 0);
-	/*ADD*/		dof6->setParam(BT_CONSTRAINT_STOP_CFM, cfm, 1);
-	/*ADD*/		dof6->setParam(BT_CONSTRAINT_STOP_CFM, cfm, 2);
-	/*ADD*/		dof6->setParam(BT_CONSTRAINT_STOP_CFM, cfm, 3);
-	/*ADD*/		dof6->setParam(BT_CONSTRAINT_STOP_CFM, cfm, 4);
-	/*ADD*/		dof6->setParam(BT_CONSTRAINT_STOP_CFM, cfm, 5);
+	/*ADD*/		// iterate through all of the removed pairs
+	/*ADD*/		// sending separation events for them
+	/*ADD*/		for (CollisionPairs::const_iterator iter = removedPairs.begin(); iter != removedPairs.end(); ++iter) {
+		/*ADD*/			SeparationEvent((btRigidBody*)iter->first, (btRigidBody*)iter->second);
+		/*ADD*/
+	}
 	/*ADD*/
-	/*ADD*/		// define the 'error reduction' of our constraint (each axis)
-	/*ADD*/		float erp = 0.5f;
-	/*ADD*/		dof6->setParam(BT_CONSTRAINT_STOP_ERP, erp, 0);
-	/*ADD*/		dof6->setParam(BT_CONSTRAINT_STOP_ERP, erp, 1);
-	/*ADD*/		dof6->setParam(BT_CONSTRAINT_STOP_ERP, erp, 2);
-	/*ADD*/		dof6->setParam(BT_CONSTRAINT_STOP_ERP, erp, 3);
-	/*ADD*/		dof6->setParam(BT_CONSTRAINT_STOP_ERP, erp, 4);
-	/*ADD*/		dof6->setParam(BT_CONSTRAINT_STOP_ERP, erp, 5);
-	/*ADD*/
-	/*ADD*/		// save this data for future reference
-	/*ADD*/		m_oldPickingDist = (output.hitPoint - m_cameraPosition).length();
+	/*ADD*/		// in the next iteration we'll want to
+	/*ADD*/		// compare against the pairs we found
+	/*ADD*/		// in this iteration
+	/*ADD*/		m_pairsLastUpdate = pairsThisUpdate;
 	/*ADD*/
 }
 /*ADD*/
-/*ADD*/	void BulletOpenGLApplication::RemovePickingConstraint() {
-	/*ADD*/		// exit in erroneous situations
-	/*ADD*/		if (!m_pPickConstraint || !m_pWorld)
-		/*ADD*/			return;
+/*ADD*/	void BulletOpenGLApplication::CollisionEvent(btRigidBody* pBody0, btRigidBody* pBody1) {
+	/*ADD*/		// find the two colliding objects
+	/*ADD*/		GameObject* pObj0 = FindGameObject(pBody0);
+	/*ADD*/		GameObject* pObj1 = FindGameObject(pBody1);
 	/*ADD*/
-	/*ADD*/		// remove the constraint from the world
-	/*ADD*/		m_pWorld->removeConstraint(m_pPickConstraint);
+	/*ADD*/		// exit if we didn't find anything
+	/*ADD*/		if (!pObj0 || !pObj1) return;
 	/*ADD*/
-	/*ADD*/		// delete the constraint object
-	/*ADD*/		delete m_pPickConstraint;
+	/*ADD*/		// set their colors to white
+	/*ADD*/		pObj0->SetColor(btVector3(1.0, 1.0, 1.0));
+	/*ADD*/		pObj1->SetColor(btVector3(1.0, 1.0, 1.0));
 	/*ADD*/
-	/*ADD*/		// reactivate the body
-	/*ADD*/		m_pPickedBody->forceActivationState(ACTIVE_TAG);
-	/*ADD*/		m_pPickedBody->setDeactivationTime(0.f);
+}
+/*ADD*/
+/*ADD*/	void BulletOpenGLApplication::SeparationEvent(btRigidBody* pBody0, btRigidBody* pBody1) {
+	/*ADD*/		// get the two separating objects
+	/*ADD*/		GameObject* pObj0 = FindGameObject((btRigidBody*)pBody0);
+	/*ADD*/		GameObject* pObj1 = FindGameObject((btRigidBody*)pBody1);
 	/*ADD*/
-	/*ADD*/		// clear the pointers
-	/*ADD*/		m_pPickConstraint = 0;
-	/*ADD*/		m_pPickedBody = 0;
+	/*ADD*/		// exit if we didn't find anything
+	/*ADD*/		if (!pObj0 || !pObj1) return;
+	/*ADD*/
+	/*ADD*/		// set their colors to black
+	/*ADD*/		pObj0->SetColor(btVector3(0.0, 0.0, 0.0));
+	/*ADD*/		pObj1->SetColor(btVector3(0.0, 0.0, 0.0));
+	/*ADD*/
+}
+/*ADD*/
+/*ADD*/	GameObject* BulletOpenGLApplication::FindGameObject(btRigidBody* pBody) {
+	/*ADD*/		// search through our list of gameobjects finding
+	/*ADD*/		// the one with a rigid body that matches the given one
+	/*ADD*/		for (GameObjects::iterator iter = m_objects.begin(); iter != m_objects.end(); ++iter) {
+		/*ADD*/			if ((*iter)->GetRigidBody() == pBody) {
+			/*ADD*/				// found the body, so return the corresponding game object
+			/*ADD*/				return *iter;
+			/*ADD*/
+		}
+		/*ADD*/
+	}
+	/*ADD*/		return 0;
 	/*ADD*/
 }

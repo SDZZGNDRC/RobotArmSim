@@ -15,9 +15,16 @@
 
 #include "GameObject.h"
 #include <vector>
+/*ADD*/	#include <set>
+/*ADD*/	#include <iterator>
+/*ADD*/	#include <algorithm>
 
 // a convenient typedef to reference an STL vector of GameObjects
 typedef std::vector<GameObject*> GameObjects;
+
+/*ADD*/	// convenient typedefs for collision events
+/*ADD*/	typedef std::pair<const btRigidBody*, const btRigidBody*> CollisionPair;
+/*ADD*/	typedef std::set<CollisionPair> CollisionPairs;
 
 // struct to store our raycasting results
 struct RayResult {
@@ -70,14 +77,20 @@ public:
 
 	void ShootBox(const btVector3& direction);
 	void DestroyGameObject(btRigidBody* pBody);
+	/*ADD*/		GameObject* FindGameObject(btRigidBody* pBody);
 
 	// picking functions
 	btVector3 GetPickingRay(int x, int y);
 	bool Raycast(const btVector3& startPosition, const btVector3& direction, RayResult& output);
 
-	/*ADD*/		// constraint functions
-	/*ADD*/		void CreatePickingConstraint(int x, int y);
-	/*ADD*/		void RemovePickingConstraint();
+	// constraint functions
+	void CreatePickingConstraint(int x, int y);
+	void RemovePickingConstraint();
+
+	/*ADD*/		// collision event functions
+	/*ADD*/		void CheckForCollisionEvents();
+	/*ADD*/		virtual void CollisionEvent(btRigidBody* pBody0, btRigidBody* pBody1);
+	/*ADD*/		virtual void SeparationEvent(btRigidBody* pBody0, btRigidBody* pBody1);
 
 protected:
 	// camera control
@@ -109,10 +122,12 @@ protected:
 	// debug renderer
 	DebugDrawer* m_pDebugDrawer;
 
-	/*ADD*/		// constraint variables
-	/*ADD*/		btRigidBody* m_pPickedBody;				// the body we picked up
-	/*ADD*/		btTypedConstraint* m_pPickConstraint;	// the constraint the body is attached to
-	/*ADD*/		btScalar m_oldPickingDist;				// the distance from the camera to the hit point (so we can move the object up, down, left and right from our view)
+	// constraint variables
+	btRigidBody* m_pPickedBody;				// the body we picked up
+	btTypedConstraint* m_pPickConstraint;	// the constraint the body is attached to
+	btScalar m_oldPickingDist;				// the distance from the camera to the hit point (so we can move the object up, down, left and right from our view)
 
+	/*ADD*/		// collision event variables
+	/*ADD*/		CollisionPairs m_pairsLastUpdate;
 };
 #endif
