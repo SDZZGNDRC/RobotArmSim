@@ -66,6 +66,8 @@ public:
 
 	// drawing functions
 	void DrawBox(const btVector3& halfSize);
+	/*ADD*/		void DrawSphere(const btScalar& radius);
+	/*ADD*/		void DrawCylinder(const btScalar& radius, const btScalar& halfHeight);
 	void DrawShape(btScalar* transform, const btCollisionShape* pShape, const btVector3& color);
 
 	// object functions
@@ -81,8 +83,7 @@ public:
 
 	// picking functions
 	btVector3 GetPickingRay(int x, int y);
-	/*REM*	bool Raycast(const btVector3 &startPosition, const btVector3 &direction, RayResult &output); **/
-	/*ADD*/	bool Raycast(const btVector3& startPosition, const btVector3& direction, RayResult& output, bool includeStatic = false);
+	bool Raycast(const btVector3& startPosition, const btVector3& direction, RayResult& output, bool includeStatic = false);
 
 	// constraint functions
 	void CreatePickingConstraint(int x, int y);

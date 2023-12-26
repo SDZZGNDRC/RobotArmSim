@@ -1,13 +1,12 @@
 #include "BasicDemo.h"
 
-/*ADD*/ BasicDemo::BasicDemo()
-	/*ADD*/ :
-	/*ADD*/	BulletOpenGLApplication(),
-	/*ADD*/ m_bApplyForce(false),
-	/*ADD*/	m_pExplosion(0),
-	/*ADD*/ m_bCanExplode(true) {
-	/*ADD*/
-	/*ADD*/
+BasicDemo::BasicDemo()
+	:
+	BulletOpenGLApplication(),
+	m_bApplyForce(false),
+	m_pExplosion(0),
+	m_bCanExplode(true) {
+
 }
 
 void BasicDemo::InitializePhysics() {
@@ -57,6 +56,13 @@ void BasicDemo::CreateObjects() {
 	m_pTrigger->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
 	// add the trigger to our world
 	m_pWorld->addCollisionObject(m_pTrigger);
+
+	/*ADD*/		// create a yellow sphere
+	/*ADD*/		CreateGameObject(new btSphereShape(1.0f), 1.0, btVector3(0.7f, 0.7f, 0.0f), btVector3(-5.0, 10.0f, 0.0f));
+	/*ADD*/
+	/*ADD*/		// create a green cylinder
+	/*ADD*/		CreateGameObject(new btCylinderShape(btVector3(1, 1, 1)), 1.0, btVector3(0.0f, 0.7f, 0.0f), btVector3(-2, 10.0f, 0.0f));
+
 }
 
 void BasicDemo::CollisionEvent(btRigidBody* pBody0, btRigidBody* pBody1) {
@@ -67,113 +73,104 @@ void BasicDemo::CollisionEvent(btRigidBody* pBody0, btRigidBody* pBody1) {
 		CreateGameObject(new btBoxShape(btVector3(2, 2, 2)), 2.0, btVector3(0.3, 0.7, 0.3), btVector3(5, 10, 0));
 	}
 
-	/*ADD*/		// Impulse testing
-	/*ADD*/	if (pBody0 == m_pExplosion || pBody1 == m_pExplosion) {
-		/*ADD*/		// get the pointer of the other object
-		/*ADD*/		btRigidBody* pOther;
-		/*ADD*/		pBody0 == m_pExplosion ? pOther = (btRigidBody*)pBody1 : pOther = (btRigidBody*)pBody0;
-		/*ADD*/		// wake the object up
-		/*ADD*/		pOther->setActivationState(ACTIVE_TAG);
-		/*ADD*/		// calculate the vector between the object and
-		/*ADD*/		// the center of the explosion
-		/*ADD*/		btVector3 dir = pOther->getWorldTransform().getOrigin() - m_pExplosion->getWorldTransform().getOrigin();
-		/*ADD*/		// get the distance
-		/*ADD*/		float dist = dir.length();
-		/*ADD*/		// calculate the impulse strength
-		/*ADD*/		float strength = EXPLOSION_STRENGTH;
-		/*ADD*/		// follow an inverse-distance rule
-		/*ADD*/		if (dist != 0.0) strength /= dist;
-		/*ADD*/		// normalize the direction vector
-		/*ADD*/		dir.normalize();
-		/*ADD*/		// apply the impulse
-		/*ADD*/		pOther->applyCentralImpulse(dir * strength);
-		/*ADD*/
+	// Impulse testing
+	if (pBody0 == m_pExplosion || pBody1 == m_pExplosion) {
+		// get the pointer of the other object
+		btRigidBody* pOther;
+		pBody0 == m_pExplosion ? pOther = (btRigidBody*)pBody1 : pOther = (btRigidBody*)pBody0;
+		// wake the object up
+		pOther->setActivationState(ACTIVE_TAG);
+		// calculate the vector between the object and
+		// the center of the explosion
+		btVector3 dir = pOther->getWorldTransform().getOrigin() - m_pExplosion->getWorldTransform().getOrigin();
+		// get the distance
+		float dist = dir.length();
+		// calculate the impulse strength
+		float strength = EXPLOSION_STRENGTH;
+		// follow an inverse-distance rule
+		if (dist != 0.0) strength /= dist;
+		// normalize the direction vector
+		dir.normalize();
+		// apply the impulse
+		pOther->applyCentralImpulse(dir * strength);
 	}
 }
 
-/*ADD*/	void BasicDemo::Keyboard(unsigned char key, int x, int y) {
-	/*ADD*/		// call the base implementation first
-	/*ADD*/		BulletOpenGLApplication::Keyboard(key, x, y);
-	/*ADD*/		switch (key) {
-		/*ADD*/		// Force testing
-	/*ADD*/		case 'g':
-		/*ADD*/ {
-		/*ADD*/				// if 'g' is held down, apply a force
-		/*ADD*/				m_bApplyForce = true;
-		/*ADD*/				// prevent the box from deactivating
-		/*ADD*/				m_pBox->GetRigidBody()->setActivationState(DISABLE_DEACTIVATION);
-		/*ADD*/				break;
-		/*ADD*/			}
-		/*ADD*/		// Impulse testing
-	/*ADD*/		case 'e':
-		/*ADD*/ {
-		/*ADD*/				// don't create a new explosion if one already exists
-		/*ADD*/				// or we haven't released the key, yet
-		/*ADD*/				if (m_pExplosion || !m_bCanExplode) break;
-		/*ADD*/				// don't let us create another explosion until the key is released
-		/*ADD*/				m_bCanExplode = false;
-		/*ADD*/				// create a collision object for our explosion
-		/*ADD*/				m_pExplosion = new btCollisionObject();
-		/*ADD*/				m_pExplosion->setCollisionShape(new btSphereShape(3.0f));
-		/*ADD*/				// get the position that we clicked
-		/*ADD*/				RayResult result;
-		/*ADD*/				Raycast(m_cameraPosition, GetPickingRay(x, y), result, true);
-		/*ADD*/				// create a transform from the hit point
-		/*ADD*/				btTransform explodeTrans;
-		/*ADD*/				explodeTrans.setIdentity();
-		/*ADD*/				explodeTrans.setOrigin(result.hitPoint);
-		/*ADD*/				m_pExplosion->setWorldTransform(explodeTrans);
-		/*ADD*/				// set the collision flag
-		/*ADD*/				m_pExplosion->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
-		/*ADD*/				// add the explosion trigger to our world
-		/*ADD*/				m_pWorld->addCollisionObject(m_pExplosion);
-		/*ADD*/				break;
-		/*ADD*/			}
-		/*ADD*/
-		/*ADD*/
+void BasicDemo::Keyboard(unsigned char key, int x, int y) {
+	// call the base implementation first
+	BulletOpenGLApplication::Keyboard(key, x, y);
+	switch (key) {
+		// Force testing
+	case 'g':
+	{
+		// if 'g' is held down, apply a force
+		m_bApplyForce = true;
+		// prevent the box from deactivating
+		m_pBox->GetRigidBody()->setActivationState(DISABLE_DEACTIVATION);
+		break;
 	}
-	/*ADD*/
+	// Impulse testing
+	case 'e':
+	{
+		// don't create a new explosion if one already exists
+		// or we haven't released the key, yet
+		if (m_pExplosion || !m_bCanExplode) break;
+		// don't let us create another explosion until the key is released
+		m_bCanExplode = false;
+		// create a collision object for our explosion
+		m_pExplosion = new btCollisionObject();
+		m_pExplosion->setCollisionShape(new btSphereShape(3.0f));
+		// get the position that we clicked
+		RayResult result;
+		Raycast(m_cameraPosition, GetPickingRay(x, y), result, true);
+		// create a transform from the hit point
+		btTransform explodeTrans;
+		explodeTrans.setIdentity();
+		explodeTrans.setOrigin(result.hitPoint);
+		m_pExplosion->setWorldTransform(explodeTrans);
+		// set the collision flag
+		m_pExplosion->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
+		// add the explosion trigger to our world
+		m_pWorld->addCollisionObject(m_pExplosion);
+		break;
+	}
+	}
 }
-/*ADD*/
-/*ADD*/	void BasicDemo::KeyboardUp(unsigned char key, int x, int y) {
-	/*ADD*/		// call the base implementation first
-	/*ADD*/		BulletOpenGLApplication::KeyboardUp(key, x, y);
-	/*ADD*/		switch (key) {
-		/*ADD*/		// Force testing
-	/*ADD*/		case 'g':
-		/*ADD*/ {
-		/*ADD*/				// if 'g' is let go, stop applying the force
-		/*ADD*/				m_bApplyForce = false;
-		/*ADD*/				// allow the object to deactivate again
-		/*ADD*/				m_pBox->GetRigidBody()->forceActivationState(ACTIVE_TAG);
-		/*ADD*/				break;
-		/*ADD*/			}
-		/*ADD*/		// Impulse testing
-	/*ADD*/		case 'e': m_bCanExplode = true; break;
-		/*ADD*/
+
+void BasicDemo::KeyboardUp(unsigned char key, int x, int y) {
+	// call the base implementation first
+	BulletOpenGLApplication::KeyboardUp(key, x, y);
+	switch (key) {
+		// Force testing
+	case 'g':
+	{
+		// if 'g' is let go, stop applying the force
+		m_bApplyForce = false;
+		// allow the object to deactivate again
+		m_pBox->GetRigidBody()->forceActivationState(ACTIVE_TAG);
+		break;
 	}
-	/*ADD*/
+	// Impulse testing
+	case 'e': m_bCanExplode = true; break;
+	}
 }
-/*ADD*/
-/*ADD*/	void BasicDemo::UpdateScene(float dt) {
-	/*ADD*/		// call the base implementation first
-	/*ADD*/		BulletOpenGLApplication::UpdateScene(dt);
-	/*ADD*/
-	/*ADD*/		// Force testing
-	/*ADD*/		if (m_bApplyForce) {
-		/*ADD*/			if (!m_pBox) return;
-		/*ADD*/			// apply a central upwards force that exceeds gravity
-		/*ADD*/			m_pBox->GetRigidBody()->applyCentralForce(btVector3(0, 20, 0));
-		/*ADD*/
+
+void BasicDemo::UpdateScene(float dt) {
+	// call the base implementation first
+	BulletOpenGLApplication::UpdateScene(dt);
+
+	// Force testing
+	if (m_bApplyForce) {
+		if (!m_pBox) return;
+		// apply a central upwards force that exceeds gravity
+		m_pBox->GetRigidBody()->applyCentralForce(btVector3(0, 20, 0));
 	}
-	/*ADD*/
-	/*ADD*/		// Impulse testing
-	/*ADD*/		if (m_pExplosion) {
-		/*ADD*/			// destroy the explosion object after one iteration
-		/*ADD*/			m_pWorld->removeCollisionObject(m_pExplosion);
-		/*ADD*/			delete m_pExplosion;
-		/*ADD*/			m_pExplosion = 0;
-		/*ADD*/
+
+	// Impulse testing
+	if (m_pExplosion) {
+		// destroy the explosion object after one iteration
+		m_pWorld->removeCollisionObject(m_pExplosion);
+		delete m_pExplosion;
+		m_pExplosion = 0;
 	}
-	/*ADD*/
 }

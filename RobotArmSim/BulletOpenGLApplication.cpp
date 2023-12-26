@@ -426,6 +426,31 @@ void BulletOpenGLApplication::DrawShape(btScalar* transform, const btCollisionSh
 		DrawBox(halfSize);
 		break;
 	}
+
+	/*ADD*/		case SPHERE_SHAPE_PROXYTYPE:
+		/*ADD*/ {
+		/*ADD*/				// assume the shape is a sphere and typecast it
+		/*ADD*/				const btSphereShape* sphere = static_cast<const btSphereShape*>(pShape);
+		/*ADD*/				// get the sphere's size from the shape
+		/*ADD*/				float radius = sphere->getMargin();
+		/*ADD*/				// draw the sphere
+		/*ADD*/				DrawSphere(radius);
+		/*ADD*/				break;
+		/*ADD*/			}
+		/*ADD*/
+	/*ADD*/		case CYLINDER_SHAPE_PROXYTYPE:
+		/*ADD*/ {
+		/*ADD*/				// assume the object is a cylinder
+		/*ADD*/				const btCylinderShape* pCylinder = static_cast<const btCylinderShape*>(pShape);
+		/*ADD*/				// get the relevant data
+		/*ADD*/				float radius = pCylinder->getRadius();
+		/*ADD*/				float halfHeight = pCylinder->getHalfExtentsWithMargin()[1];
+		/*ADD*/				// draw the cylinder
+		/*ADD*/				DrawCylinder(radius, halfHeight);
+		/*ADD*/
+		/*ADD*/				break;
+		/*ADD*/			}
+
 	default:
 		// unsupported type
 		break;
@@ -502,8 +527,7 @@ void BulletOpenGLApplication::ShootBox(const btVector3& direction) {
 	pObject->GetRigidBody()->setLinearVelocity(velocity);
 }
 
-/*REM**	bool BulletOpenGLApplication::Raycast(const btVector3 &startPosition, const btVector3 &direction, RayResult &output) { **/
-/*ADD*/	bool BulletOpenGLApplication::Raycast(const btVector3& startPosition, const btVector3& direction, RayResult& output, bool includeStatic) {
+bool BulletOpenGLApplication::Raycast(const btVector3& startPosition, const btVector3& direction, RayResult& output, bool includeStatic) {
 	if (!m_pWorld)
 		return false;
 
@@ -527,7 +551,7 @@ void BulletOpenGLApplication::ShootBox(const btVector3& direction) {
 
 		// prevent us from picking objects 
 		// like the ground plane
-		/*ADD*/		if (!includeStatic) // skip this check if we want it to hit static objects
+		if (!includeStatic) // skip this check if we want it to hit static objects
 			if (pBody->isStaticObject() || pBody->isKinematicObject())
 				return false;
 
@@ -720,4 +744,82 @@ GameObject* BulletOpenGLApplication::FindGameObject(btRigidBody* pBody) {
 		}
 	}
 	return 0;
+}
+
+/*ADD*/	void BulletOpenGLApplication::DrawSphere(const btScalar& radius) {
+	/*ADD*/		// some constant values for more many segments to build the sphere from
+	/*ADD*/		static int lateralSegments = 25;
+	/*ADD*/		static int longitudinalSegments = 25;
+	/*ADD*/
+	/*ADD*/		// iterate laterally
+	/*ADD*/		for (int i = 0; i <= lateralSegments; i++) {
+		/*ADD*/			// do a little math to find the angles of this segment
+		/*ADD*/			btScalar lat0 = SIMD_PI * (-btScalar(0.5) + (btScalar)(i - 1) / lateralSegments);
+		/*ADD*/			btScalar z0 = radius * sin(lat0);
+		/*ADD*/			btScalar zr0 = radius * cos(lat0);
+		/*ADD*/
+		/*ADD*/			btScalar lat1 = SIMD_PI * (-btScalar(0.5) + (btScalar)i / lateralSegments);
+		/*ADD*/			btScalar z1 = radius * sin(lat1);
+		/*ADD*/			btScalar zr1 = radius * cos(lat1);
+		/*ADD*/
+		/*ADD*/			// start rendering strips of quads (polygons with 4 poins)
+		/*ADD*/			glBegin(GL_QUAD_STRIP);
+		/*ADD*/			// iterate longitudinally
+		/*ADD*/			for (int j = 0; j <= longitudinalSegments; j++) {
+			/*ADD*/				// determine the points of the quad from the lateral angles
+			/*ADD*/				btScalar lng = 2 * SIMD_PI * (btScalar)(j - 1) / longitudinalSegments;
+			/*ADD*/				btScalar x = cos(lng);
+			/*ADD*/				btScalar y = sin(lng);
+			/*ADD*/				// draw the normals and vertices for each point in the quad
+			/*ADD*/				// since it is a STRIP of quads, we only need to add two points
+			/*ADD*/				// each time to create a whole new quad
+			/*ADD*/
+			/*ADD*/				// calculate the normal
+			/*ADD*/				btVector3 normal = btVector3(x * zr0, y * zr0, z0);
+			/*ADD*/				normal.normalize();
+			/*ADD*/				glNormal3f(normal.x(), normal.y(), normal.z());
+			/*ADD*/				// create the first vertex
+			/*ADD*/				glVertex3f(x * zr0, y * zr0, z0);
+			/*ADD*/
+			/*ADD*/				// calculate the next normal
+			/*ADD*/				normal = btVector3(x * zr1, y * zr1, z1);
+			/*ADD*/				normal.normalize();
+			/*ADD*/				glNormal3f(normal.x(), normal.y(), normal.z());
+			/*ADD*/				// create the second vertex
+			/*ADD*/				glVertex3f(x * zr1, y * zr1, z1);
+			/*ADD*/
+			/*ADD*/				// and repeat...
+			/*ADD*/
+		}
+		/*ADD*/			glEnd();
+		/*ADD*/
+	}
+	/*ADD*/
+}
+
+/*ADD*/	void BulletOpenGLApplication::DrawCylinder(const btScalar& radius, const btScalar& halfHeight) {
+	/*ADD*/		static int slices = 15;
+	/*ADD*/		static int stacks = 10;
+	/*ADD*/		// tweak the starting position of the
+	/*ADD*/		// cylinder to match the physics object
+	/*ADD*/		glRotatef(-90.0, 1.0, 0.0, 0.0);
+	/*ADD*/		glTranslatef(0.0, 0.0, -halfHeight);
+	/*ADD*/		// create a quadric object to render with
+	/*ADD*/		GLUquadricObj* quadObj = gluNewQuadric();
+	/*ADD*/		// set the draw style of the quadric
+	/*ADD*/		gluQuadricDrawStyle(quadObj, (GLenum)GLU_FILL);
+	/*ADD*/		gluQuadricNormals(quadObj, (GLenum)GLU_SMOOTH);
+	/*ADD*/		// create a disk to cap the cylinder
+	/*ADD*/		gluDisk(quadObj, 0, radius, slices, stacks);
+	/*ADD*/		// create the main hull of the cylinder (no caps)
+	/*ADD*/		gluCylinder(quadObj, radius, radius, 2.f * halfHeight, slices, stacks);
+	/*ADD*/		// shift the position and rotation again
+	/*ADD*/		glTranslatef(0.0f, 0.0f, 2.f * halfHeight);
+	/*ADD*/		glRotatef(-180.0f, 0.0f, 1.0f, 0.0f);
+	/*ADD*/		// draw the cap on the other end of the cylinder
+	/*ADD*/		gluDisk(quadObj, 0, radius, slices, stacks);
+	/*ADD*/		// don't need the quadric anymore, so remove it
+	/*ADD*/		// to save memory
+	/*ADD*/		gluDeleteQuadric(quadObj);
+	/*ADD*/
 }
