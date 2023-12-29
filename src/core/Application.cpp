@@ -278,6 +278,11 @@ void Application::run(void) {
 				}
 				PopID();
 			}
+			PushID(robot_->getNumJoints());
+			Text("gripper");
+			SameLine();
+			SliderAngle("", &gripper_angle_control_, 0, 90.0f);
+			PopID();
 			End();
 
 			Begin("Joint PID controller gains:");
@@ -440,6 +445,12 @@ void Application::applyJointControls() {
 			robot_->setJointTargetAngle(i, joint_angle_controls_[i]);
 			prev_controls_[i] = curr;
 		}
+	}
+	float curr = gripper_angle_control_;
+	float prev = prev_gripper_angle_control_;
+	if (abs(curr - prev) > 0.0001) {
+		robot_->setGripperTargetAngle(gripper_angle_control_);
+		prev_gripper_angle_control_ = curr;
 	}
 }
 

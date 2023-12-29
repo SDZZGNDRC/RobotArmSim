@@ -64,6 +64,9 @@ private:
 	bool				shading_mode_changed_;
 	std::vector<float>  joint_angle_controls_;
 	std::vector<float>	prev_controls_;
+	
+	float gripper_angle_control_ = 0;
+	float prev_gripper_angle_control_ = 0;
 
 	uint64_t time_end_;
 	float temp = 0;

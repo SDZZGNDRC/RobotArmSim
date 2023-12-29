@@ -18,12 +18,16 @@ set(SOURCES
     src/core/DhParam.cpp
     src/core/InverseKinematics.cpp
     src/core/JointedLink.cpp
+    src/core/JointedLink2.cpp
+    src/core/JointedGripper.cpp
     src/core/PidController.cpp
     src/core/Robot.cpp
     src/Main.cpp
     src/meshes/BoxMesh.cpp
     src/meshes/CylinderMesh.cpp
     src/meshes/JointedLinkMesh.cpp
+    src/meshes/JointedLinkMesh2.cpp
+    src/meshes/JointedGripperMesh.cpp
     src/meshes/Mesh.cpp
     src/meshes/SphereMesh.cpp
     src/rendering/Camera.cpp 

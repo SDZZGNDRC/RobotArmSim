@@ -36,7 +36,7 @@ void JointedLink::updateLinkMatrix(float rotationAngle)
 void JointedLink::updateMesh()
 {
 	// the mesh is oriented using the joint's world transform
-	Affine3f joint_to_world = to_world_ * link_matrix_.inverse();
+	Affine3f joint_to_world = to_world_ * link_matrix_.inverse(); // joint's world transform
 
 	// align with joint's z axis and rotate around it by the joint's rotation
 	// NOTE: this differs from DH standard somewhat, since this would imply that the

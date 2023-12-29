@@ -109,6 +109,20 @@ build CMakeFiles/robosim.dir/src/core/JointedLink.cpp.o: CXX_COMPILER__robosim_u
   OBJECT_DIR = CMakeFiles/robosim.dir
   OBJECT_FILE_DIR = CMakeFiles/robosim.dir/src/core
 
+build CMakeFiles/robosim.dir/src/core/JointedLink2.cpp.o: CXX_COMPILER__robosim_unscanned_Debug /home/sdzz/projects/robosim/src/core/JointedLink2.cpp || cmake_object_order_depends_target_robosim
+  DEP_FILE = CMakeFiles/robosim.dir/src/core/JointedLink2.cpp.o.d
+  FLAGS = -g -std=gnu++17
+  INCLUDES = -I/home/sdzz/projects/robosim/src -I/home/sdzz/projects/robosim/imgui -I/home/sdzz/projects/robosim/imgui/backends -I/home/sdzz/projects/robosim/lib/ImGuizmo -isystem /usr/include/eigen3
+  OBJECT_DIR = CMakeFiles/robosim.dir
+  OBJECT_FILE_DIR = CMakeFiles/robosim.dir/src/core
+
+build CMakeFiles/robosim.dir/src/core/JointedGripper.cpp.o: CXX_COMPILER__robosim_unscanned_Debug /home/sdzz/projects/robosim/src/core/JointedGripper.cpp || cmake_object_order_depends_target_robosim
+  DEP_FILE = CMakeFiles/robosim.dir/src/core/JointedGripper.cpp.o.d
+  FLAGS = -g -std=gnu++17
+  INCLUDES = -I/home/sdzz/projects/robosim/src -I/home/sdzz/projects/robosim/imgui -I/home/sdzz/projects/robosim/imgui/backends -I/home/sdzz/projects/robosim/lib/ImGuizmo -isystem /usr/include/eigen3
+  OBJECT_DIR = CMakeFiles/robosim.dir
+  OBJECT_FILE_DIR = CMakeFiles/robosim.dir/src/core
+
 build CMakeFiles/robosim.dir/src/core/PidController.cpp.o: CXX_COMPILER__robosim_unscanned_Debug /home/sdzz/projects/robosim/src/core/PidController.cpp || cmake_object_order_depends_target_robosim
   DEP_FILE = CMakeFiles/robosim.dir/src/core/PidController.cpp.o.d
   FLAGS = -g -std=gnu++17
@@ -146,6 +160,20 @@ build CMakeFiles/robosim.dir/src/meshes/CylinderMesh.cpp.o: CXX_COMPILER__robosi
 
 build CMakeFiles/robosim.dir/src/meshes/JointedLinkMesh.cpp.o: CXX_COMPILER__robosim_unscanned_Debug /home/sdzz/projects/robosim/src/meshes/JointedLinkMesh.cpp || cmake_object_order_depends_target_robosim
   DEP_FILE = CMakeFiles/robosim.dir/src/meshes/JointedLinkMesh.cpp.o.d
+  FLAGS = -g -std=gnu++17
+  INCLUDES = -I/home/sdzz/projects/robosim/src -I/home/sdzz/projects/robosim/imgui -I/home/sdzz/projects/robosim/imgui/backends -I/home/sdzz/projects/robosim/lib/ImGuizmo -isystem /usr/include/eigen3
+  OBJECT_DIR = CMakeFiles/robosim.dir
+  OBJECT_FILE_DIR = CMakeFiles/robosim.dir/src/meshes
+
+build CMakeFiles/robosim.dir/src/meshes/JointedLinkMesh2.cpp.o: CXX_COMPILER__robosim_unscanned_Debug /home/sdzz/projects/robosim/src/meshes/JointedLinkMesh2.cpp || cmake_object_order_depends_target_robosim
+  DEP_FILE = CMakeFiles/robosim.dir/src/meshes/JointedLinkMesh2.cpp.o.d
+  FLAGS = -g -std=gnu++17
+  INCLUDES = -I/home/sdzz/projects/robosim/src -I/home/sdzz/projects/robosim/imgui -I/home/sdzz/projects/robosim/imgui/backends -I/home/sdzz/projects/robosim/lib/ImGuizmo -isystem /usr/include/eigen3
+  OBJECT_DIR = CMakeFiles/robosim.dir
+  OBJECT_FILE_DIR = CMakeFiles/robosim.dir/src/meshes
+
+build CMakeFiles/robosim.dir/src/meshes/JointedGripperMesh.cpp.o: CXX_COMPILER__robosim_unscanned_Debug /home/sdzz/projects/robosim/src/meshes/JointedGripperMesh.cpp || cmake_object_order_depends_target_robosim
+  DEP_FILE = CMakeFiles/robosim.dir/src/meshes/JointedGripperMesh.cpp.o.d
   FLAGS = -g -std=gnu++17
   INCLUDES = -I/home/sdzz/projects/robosim/src -I/home/sdzz/projects/robosim/imgui -I/home/sdzz/projects/robosim/imgui/backends -I/home/sdzz/projects/robosim/lib/ImGuizmo -isystem /usr/include/eigen3
   OBJECT_DIR = CMakeFiles/robosim.dir
@@ -229,7 +257,7 @@ build CMakeFiles/robosim.dir/imgui/backends/imgui_impl_opengl3.cpp.o: CXX_COMPIL
 #############################################
 # Link the executable /home/sdzz/projects/robosim/robosim
 
-build /home/sdzz/projects/robosim/robosim: CXX_EXECUTABLE_LINKER__robosim_Debug CMakeFiles/robosim.dir/src/core/Application.cpp.o CMakeFiles/robosim.dir/src/core/DhParam.cpp.o CMakeFiles/robosim.dir/src/core/InverseKinematics.cpp.o CMakeFiles/robosim.dir/src/core/JointedLink.cpp.o CMakeFiles/robosim.dir/src/core/PidController.cpp.o CMakeFiles/robosim.dir/src/core/Robot.cpp.o CMakeFiles/robosim.dir/src/Main.cpp.o CMakeFiles/robosim.dir/src/meshes/BoxMesh.cpp.o CMakeFiles/robosim.dir/src/meshes/CylinderMesh.cpp.o CMakeFiles/robosim.dir/src/meshes/JointedLinkMesh.cpp.o CMakeFiles/robosim.dir/src/meshes/Mesh.cpp.o CMakeFiles/robosim.dir/src/meshes/SphereMesh.cpp.o CMakeFiles/robosim.dir/src/rendering/Camera.cpp.o CMakeFiles/robosim.dir/imgui/imgui.cpp.o CMakeFiles/robosim.dir/imgui/imgui_draw.cpp.o CMakeFiles/robosim.dir/imgui/imgui_demo.cpp.o CMakeFiles/robosim.dir/imgui/imgui_tables.cpp.o CMakeFiles/robosim.dir/imgui/imgui_widgets.cpp.o CMakeFiles/robosim.dir/imgui/backends/imgui_impl_glfw.cpp.o CMakeFiles/robosim.dir/imgui/backends/imgui_impl_opengl3.cpp.o | /usr/lib/x86_64-linux-gnu/libGLEW.so libImGuizmo.a /usr/lib/x86_64-linux-gnu/libGLX.so /usr/lib/x86_64-linux-gnu/libOpenGL.so /usr/lib/x86_64-linux-gnu/libglfw.so.3.3 /usr/lib/x86_64-linux-gnu/libGLEW.so || libImGuizmo.a
+build /home/sdzz/projects/robosim/robosim: CXX_EXECUTABLE_LINKER__robosim_Debug CMakeFiles/robosim.dir/src/core/Application.cpp.o CMakeFiles/robosim.dir/src/core/DhParam.cpp.o CMakeFiles/robosim.dir/src/core/InverseKinematics.cpp.o CMakeFiles/robosim.dir/src/core/JointedLink.cpp.o CMakeFiles/robosim.dir/src/core/JointedLink2.cpp.o CMakeFiles/robosim.dir/src/core/JointedGripper.cpp.o CMakeFiles/robosim.dir/src/core/PidController.cpp.o CMakeFiles/robosim.dir/src/core/Robot.cpp.o CMakeFiles/robosim.dir/src/Main.cpp.o CMakeFiles/robosim.dir/src/meshes/BoxMesh.cpp.o CMakeFiles/robosim.dir/src/meshes/CylinderMesh.cpp.o CMakeFiles/robosim.dir/src/meshes/JointedLinkMesh.cpp.o CMakeFiles/robosim.dir/src/meshes/JointedLinkMesh2.cpp.o CMakeFiles/robosim.dir/src/meshes/JointedGripperMesh.cpp.o CMakeFiles/robosim.dir/src/meshes/Mesh.cpp.o CMakeFiles/robosim.dir/src/meshes/SphereMesh.cpp.o CMakeFiles/robosim.dir/src/rendering/Camera.cpp.o CMakeFiles/robosim.dir/imgui/imgui.cpp.o CMakeFiles/robosim.dir/imgui/imgui_draw.cpp.o CMakeFiles/robosim.dir/imgui/imgui_demo.cpp.o CMakeFiles/robosim.dir/imgui/imgui_tables.cpp.o CMakeFiles/robosim.dir/imgui/imgui_widgets.cpp.o CMakeFiles/robosim.dir/imgui/backends/imgui_impl_glfw.cpp.o CMakeFiles/robosim.dir/imgui/backends/imgui_impl_opengl3.cpp.o | /usr/lib/x86_64-linux-gnu/libGLEW.so libImGuizmo.a /usr/lib/x86_64-linux-gnu/libGLX.so /usr/lib/x86_64-linux-gnu/libOpenGL.so /usr/lib/x86_64-linux-gnu/libglfw.so.3.3 /usr/lib/x86_64-linux-gnu/libGLEW.so || libImGuizmo.a
   FLAGS = -g
   LINK_LIBRARIES = -ldl  /usr/lib/x86_64-linux-gnu/libGLEW.so  libImGuizmo.a  /usr/lib/x86_64-linux-gnu/libGLX.so  /usr/lib/x86_64-linux-gnu/libOpenGL.so  /usr/lib/x86_64-linux-gnu/libglfw.so.3.3  /usr/lib/x86_64-linux-gnu/libGLEW.so
   OBJECT_DIR = CMakeFiles/robosim.dir

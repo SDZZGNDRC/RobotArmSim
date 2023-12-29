@@ -31,6 +31,18 @@
 },
 {
   "directory": "/home/sdzz/projects/robosim/build",
+  "command": "/usr/bin/g++ -I/home/sdzz/projects/robosim/src -I/home/sdzz/projects/robosim/imgui -I/home/sdzz/projects/robosim/imgui/backends -I/home/sdzz/projects/robosim/lib/ImGuizmo -isystem /usr/include/eigen3 -g -std=gnu++17 -o CMakeFiles/robosim.dir/src/core/JointedLink2.cpp.o -c /home/sdzz/projects/robosim/src/core/JointedLink2.cpp",
+  "file": "/home/sdzz/projects/robosim/src/core/JointedLink2.cpp",
+  "output": "CMakeFiles/robosim.dir/src/core/JointedLink2.cpp.o"
+},
+{
+  "directory": "/home/sdzz/projects/robosim/build",
+  "command": "/usr/bin/g++ -I/home/sdzz/projects/robosim/src -I/home/sdzz/projects/robosim/imgui -I/home/sdzz/projects/robosim/imgui/backends -I/home/sdzz/projects/robosim/lib/ImGuizmo -isystem /usr/include/eigen3 -g -std=gnu++17 -o CMakeFiles/robosim.dir/src/core/JointedGripper.cpp.o -c /home/sdzz/projects/robosim/src/core/JointedGripper.cpp",
+  "file": "/home/sdzz/projects/robosim/src/core/JointedGripper.cpp",
+  "output": "CMakeFiles/robosim.dir/src/core/JointedGripper.cpp.o"
+},
+{
+  "directory": "/home/sdzz/projects/robosim/build",
   "command": "/usr/bin/g++ -I/home/sdzz/projects/robosim/src -I/home/sdzz/projects/robosim/imgui -I/home/sdzz/projects/robosim/imgui/backends -I/home/sdzz/projects/robosim/lib/ImGuizmo -isystem /usr/include/eigen3 -g -std=gnu++17 -o CMakeFiles/robosim.dir/src/core/PidController.cpp.o -c /home/sdzz/projects/robosim/src/core/PidController.cpp",
   "file": "/home/sdzz/projects/robosim/src/core/PidController.cpp",
   "output": "CMakeFiles/robosim.dir/src/core/PidController.cpp.o"
@@ -64,6 +76,18 @@
   "command": "/usr/bin/g++ -I/home/sdzz/projects/robosim/src -I/home/sdzz/projects/robosim/imgui -I/home/sdzz/projects/robosim/imgui/backends -I/home/sdzz/projects/robosim/lib/ImGuizmo -isystem /usr/include/eigen3 -g -std=gnu++17 -o CMakeFiles/robosim.dir/src/meshes/JointedLinkMesh.cpp.o -c /home/sdzz/projects/robosim/src/meshes/JointedLinkMesh.cpp",
   "file": "/home/sdzz/projects/robosim/src/meshes/JointedLinkMesh.cpp",
   "output": "CMakeFiles/robosim.dir/src/meshes/JointedLinkMesh.cpp.o"
+},
+{
+  "directory": "/home/sdzz/projects/robosim/build",
+  "command": "/usr/bin/g++ -I/home/sdzz/projects/robosim/src -I/home/sdzz/projects/robosim/imgui -I/home/sdzz/projects/robosim/imgui/backends -I/home/sdzz/projects/robosim/lib/ImGuizmo -isystem /usr/include/eigen3 -g -std=gnu++17 -o CMakeFiles/robosim.dir/src/meshes/JointedLinkMesh2.cpp.o -c /home/sdzz/projects/robosim/src/meshes/JointedLinkMesh2.cpp",
+  "file": "/home/sdzz/projects/robosim/src/meshes/JointedLinkMesh2.cpp",
+  "output": "CMakeFiles/robosim.dir/src/meshes/JointedLinkMesh2.cpp.o"
+},
+{
+  "directory": "/home/sdzz/projects/robosim/build",
+  "command": "/usr/bin/g++ -I/home/sdzz/projects/robosim/src -I/home/sdzz/projects/robosim/imgui -I/home/sdzz/projects/robosim/imgui/backends -I/home/sdzz/projects/robosim/lib/ImGuizmo -isystem /usr/include/eigen3 -g -std=gnu++17 -o CMakeFiles/robosim.dir/src/meshes/JointedGripperMesh.cpp.o -c /home/sdzz/projects/robosim/src/meshes/JointedGripperMesh.cpp",
+  "file": "/home/sdzz/projects/robosim/src/meshes/JointedGripperMesh.cpp",
+  "output": "CMakeFiles/robosim.dir/src/meshes/JointedGripperMesh.cpp.o"
 },
 {
   "directory": "/home/sdzz/projects/robosim/build",

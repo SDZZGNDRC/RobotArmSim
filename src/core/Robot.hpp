@@ -5,6 +5,7 @@
 
 #include "DhParam.hpp"
 #include "JointedLink.hpp"
+#include "JointedLink2.hpp"
 #include "Eigen/Dense"
 
 class Robot {
@@ -39,6 +40,9 @@ public:
 
 	void					setJointControllerPidGains(float p, float i, float d);
 
+	// gripper angle setters
+	void					setGripperTargetAngle(float angle);
+
 	std::vector<Vertex>		getMeshVertices() const;
 
 	size_t					getNumJoints() const { return links_.size(); };
@@ -67,6 +71,8 @@ private:
 	void createLinks(const std::vector<DhParam>& params);
 
 	std::vector<JointedLink> links_;
+	JointedLink2 gripper_left;
+	JointedLink2 gripper_right;
 	Eigen::Vector3f ik_target_;
 };
 

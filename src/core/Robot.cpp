@@ -33,7 +33,9 @@ using namespace std;
 * This means that the worldToBase transform describes what conventionally would be worldToBase * baseToZero
 */
 Robot::Robot(std::string dh_param_filename, Vector3f location):
-	ik_target_(Vector3f::Zero())
+	ik_target_(Vector3f::Zero()),
+	gripper_left(JointedLink2(DhParam(), 0.0f, 0)),
+	gripper_right(JointedLink2(DhParam(), 0.0f, 0))
 {
 	// set the transformation from world to base, which includes rotation to turn z-axis upwards
 	// and the robots location in the world
@@ -42,6 +44,13 @@ Robot::Robot(std::string dh_param_filename, Vector3f location):
 	// create kinematic model and links of the robot
 	vector<DhParam> params = loadDhParamsFromFile(dh_param_filename);
 	this->createLinks(params);
+	DhParam p;
+	p.a = 0.1f; p.d = 0.0f; p.alpha = 0.0f; p.sigma = "R";
+	p.theta = -1.0f;
+	gripper_left = JointedLink2(p, 0.0f, (int)links_.size());
+	gripper_left.setJointTargetRotation(0.0f);
+	gripper_right = JointedLink2(p, 0.0f, (int)links_.size());
+	gripper_right.setJointTargetRotation(-0.0f);
 }
 
 void Robot::createLinks(const std::vector<DhParam>& dh_params)
@@ -79,6 +88,8 @@ void Robot::update(float dt)
 		link.update(dt, current_to_world);
 		current_to_world = current_to_world * link.getLinkMatrix();
 	}
+	gripper_left.update(dt, current_to_world);
+	gripper_right.update(dt, current_to_world);
 }
 
 // TCP position for current joint angles
@@ -218,6 +229,12 @@ void Robot::setJointTargetAngle(unsigned index, float angle)
 	links_[index].setJointTargetRotation(angle);
 }
 
+void Robot::setGripperTargetAngle(float angle)
+{
+	gripper_left.setJointTargetRotation(angle);
+	gripper_right.setJointTargetRotation(-1*angle);
+}
+
 void Robot::setJointControllerPidGains(float p, float i, float d)
 {
 	for (JointedLink& link : links_)
@@ -228,10 +245,14 @@ void Robot::setJointControllerPidGains(float p, float i, float d)
 
 std::vector<Vertex> Robot::getMeshVertices() const
 {
-	std::vector<Vertex> all_vertices;
+	std::vector<Vertex> all_vertices, gripper_left_verts_, gripper_right_verts_;
 	for (int i = 0; i < links_.size(); i++) {
 		std::vector<Vertex> link_vertices = links_[i].getMeshVertices();
 		all_vertices.insert(all_vertices.end(), link_vertices.begin(), link_vertices.end());
 	}
+	gripper_left_verts_ = gripper_left.getMeshVertices();
+	gripper_right_verts_ = gripper_right.getMeshVertices();
+	all_vertices.insert(all_vertices.end(), gripper_left_verts_.begin(), gripper_left_verts_.end());
+	all_vertices.insert(all_vertices.end(), gripper_right_verts_.begin(), gripper_right_verts_.end());
 	return all_vertices;
 }
