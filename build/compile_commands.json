@@ -1,0 +1,128 @@
+[
+{
+  "directory": "/home/sdzz/projects/robosim/build",
+  "command": "/usr/bin/g++ -I/home/sdzz/projects/robosim/src -I/home/sdzz/projects/robosim/imgui -I/home/sdzz/projects/robosim/imgui/backends -I/home/sdzz/projects/robosim/lib/ImGuizmo -g -std=gnu++17 -o CMakeFiles/ImGuizmo.dir/lib/ImGuizmo/ImGuizmo.cpp.o -c /home/sdzz/projects/robosim/lib/ImGuizmo/ImGuizmo.cpp",
+  "file": "/home/sdzz/projects/robosim/lib/ImGuizmo/ImGuizmo.cpp",
+  "output": "CMakeFiles/ImGuizmo.dir/lib/ImGuizmo/ImGuizmo.cpp.o"
+},
+{
+  "directory": "/home/sdzz/projects/robosim/build",
+  "command": "/usr/bin/g++ -I/home/sdzz/projects/robosim/src -I/home/sdzz/projects/robosim/imgui -I/home/sdzz/projects/robosim/imgui/backends -I/home/sdzz/projects/robosim/lib/ImGuizmo -isystem /usr/include/eigen3 -g -std=gnu++17 -o CMakeFiles/robosim.dir/src/core/Application.cpp.o -c /home/sdzz/projects/robosim/src/core/Application.cpp",
+  "file": "/home/sdzz/projects/robosim/src/core/Application.cpp",
+  "output": "CMakeFiles/robosim.dir/src/core/Application.cpp.o"
+},
+{
+  "directory": "/home/sdzz/projects/robosim/build",
+  "command": "/usr/bin/g++ -I/home/sdzz/projects/robosim/src -I/home/sdzz/projects/robosim/imgui -I/home/sdzz/projects/robosim/imgui/backends -I/home/sdzz/projects/robosim/lib/ImGuizmo -isystem /usr/include/eigen3 -g -std=gnu++17 -o CMakeFiles/robosim.dir/src/core/DhParam.cpp.o -c /home/sdzz/projects/robosim/src/core/DhParam.cpp",
+  "file": "/home/sdzz/projects/robosim/src/core/DhParam.cpp",
+  "output": "CMakeFiles/robosim.dir/src/core/DhParam.cpp.o"
+},
+{
+  "directory": "/home/sdzz/projects/robosim/build",
+  "command": "/usr/bin/g++ -I/home/sdzz/projects/robosim/src -I/home/sdzz/projects/robosim/imgui -I/home/sdzz/projects/robosim/imgui/backends -I/home/sdzz/projects/robosim/lib/ImGuizmo -isystem /usr/include/eigen3 -g -std=gnu++17 -o CMakeFiles/robosim.dir/src/core/InverseKinematics.cpp.o -c /home/sdzz/projects/robosim/src/core/InverseKinematics.cpp",
+  "file": "/home/sdzz/projects/robosim/src/core/InverseKinematics.cpp",
+  "output": "CMakeFiles/robosim.dir/src/core/InverseKinematics.cpp.o"
+},
+{
+  "directory": "/home/sdzz/projects/robosim/build",
+  "command": "/usr/bin/g++ -I/home/sdzz/projects/robosim/src -I/home/sdzz/projects/robosim/imgui -I/home/sdzz/projects/robosim/imgui/backends -I/home/sdzz/projects/robosim/lib/ImGuizmo -isystem /usr/include/eigen3 -g -std=gnu++17 -o CMakeFiles/robosim.dir/src/core/JointedLink.cpp.o -c /home/sdzz/projects/robosim/src/core/JointedLink.cpp",
+  "file": "/home/sdzz/projects/robosim/src/core/JointedLink.cpp",
+  "output": "CMakeFiles/robosim.dir/src/core/JointedLink.cpp.o"
+},
+{
+  "directory": "/home/sdzz/projects/robosim/build",
+  "command": "/usr/bin/g++ -I/home/sdzz/projects/robosim/src -I/home/sdzz/projects/robosim/imgui -I/home/sdzz/projects/robosim/imgui/backends -I/home/sdzz/projects/robosim/lib/ImGuizmo -isystem /usr/include/eigen3 -g -std=gnu++17 -o CMakeFiles/robosim.dir/src/core/PidController.cpp.o -c /home/sdzz/projects/robosim/src/core/PidController.cpp",
+  "file": "/home/sdzz/projects/robosim/src/core/PidController.cpp",
+  "output": "CMakeFiles/robosim.dir/src/core/PidController.cpp.o"
+},
+{
+  "directory": "/home/sdzz/projects/robosim/build",
+  "command": "/usr/bin/g++ -I/home/sdzz/projects/robosim/src -I/home/sdzz/projects/robosim/imgui -I/home/sdzz/projects/robosim/imgui/backends -I/home/sdzz/projects/robosim/lib/ImGuizmo -isystem /usr/include/eigen3 -g -std=gnu++17 -o CMakeFiles/robosim.dir/src/core/Robot.cpp.o -c /home/sdzz/projects/robosim/src/core/Robot.cpp",
+  "file": "/home/sdzz/projects/robosim/src/core/Robot.cpp",
+  "output": "CMakeFiles/robosim.dir/src/core/Robot.cpp.o"
+},
+{
+  "directory": "/home/sdzz/projects/robosim/build",
+  "command": "/usr/bin/g++ -I/home/sdzz/projects/robosim/src -I/home/sdzz/projects/robosim/imgui -I/home/sdzz/projects/robosim/imgui/backends -I/home/sdzz/projects/robosim/lib/ImGuizmo -isystem /usr/include/eigen3 -g -std=gnu++17 -o CMakeFiles/robosim.dir/src/Main.cpp.o -c /home/sdzz/projects/robosim/src/Main.cpp",
+  "file": "/home/sdzz/projects/robosim/src/Main.cpp",
+  "output": "CMakeFiles/robosim.dir/src/Main.cpp.o"
+},
+{
+  "directory": "/home/sdzz/projects/robosim/build",
+  "command": "/usr/bin/g++ -I/home/sdzz/projects/robosim/src -I/home/sdzz/projects/robosim/imgui -I/home/sdzz/projects/robosim/imgui/backends -I/home/sdzz/projects/robosim/lib/ImGuizmo -isystem /usr/include/eigen3 -g -std=gnu++17 -o CMakeFiles/robosim.dir/src/meshes/BoxMesh.cpp.o -c /home/sdzz/projects/robosim/src/meshes/BoxMesh.cpp",
+  "file": "/home/sdzz/projects/robosim/src/meshes/BoxMesh.cpp",
+  "output": "CMakeFiles/robosim.dir/src/meshes/BoxMesh.cpp.o"
+},
+{
+  "directory": "/home/sdzz/projects/robosim/build",
+  "command": "/usr/bin/g++ -I/home/sdzz/projects/robosim/src -I/home/sdzz/projects/robosim/imgui -I/home/sdzz/projects/robosim/imgui/backends -I/home/sdzz/projects/robosim/lib/ImGuizmo -isystem /usr/include/eigen3 -g -std=gnu++17 -o CMakeFiles/robosim.dir/src/meshes/CylinderMesh.cpp.o -c /home/sdzz/projects/robosim/src/meshes/CylinderMesh.cpp",
+  "file": "/home/sdzz/projects/robosim/src/meshes/CylinderMesh.cpp",
+  "output": "CMakeFiles/robosim.dir/src/meshes/CylinderMesh.cpp.o"
+},
+{
+  "directory": "/home/sdzz/projects/robosim/build",
+  "command": "/usr/bin/g++ -I/home/sdzz/projects/robosim/src -I/home/sdzz/projects/robosim/imgui -I/home/sdzz/projects/robosim/imgui/backends -I/home/sdzz/projects/robosim/lib/ImGuizmo -isystem /usr/include/eigen3 -g -std=gnu++17 -o CMakeFiles/robosim.dir/src/meshes/JointedLinkMesh.cpp.o -c /home/sdzz/projects/robosim/src/meshes/JointedLinkMesh.cpp",
+  "file": "/home/sdzz/projects/robosim/src/meshes/JointedLinkMesh.cpp",
+  "output": "CMakeFiles/robosim.dir/src/meshes/JointedLinkMesh.cpp.o"
+},
+{
+  "directory": "/home/sdzz/projects/robosim/build",
+  "command": "/usr/bin/g++ -I/home/sdzz/projects/robosim/src -I/home/sdzz/projects/robosim/imgui -I/home/sdzz/projects/robosim/imgui/backends -I/home/sdzz/projects/robosim/lib/ImGuizmo -isystem /usr/include/eigen3 -g -std=gnu++17 -o CMakeFiles/robosim.dir/src/meshes/Mesh.cpp.o -c /home/sdzz/projects/robosim/src/meshes/Mesh.cpp",
+  "file": "/home/sdzz/projects/robosim/src/meshes/Mesh.cpp",
+  "output": "CMakeFiles/robosim.dir/src/meshes/Mesh.cpp.o"
+},
+{
+  "directory": "/home/sdzz/projects/robosim/build",
+  "command": "/usr/bin/g++ -I/home/sdzz/projects/robosim/src -I/home/sdzz/projects/robosim/imgui -I/home/sdzz/projects/robosim/imgui/backends -I/home/sdzz/projects/robosim/lib/ImGuizmo -isystem /usr/include/eigen3 -g -std=gnu++17 -o CMakeFiles/robosim.dir/src/meshes/SphereMesh.cpp.o -c /home/sdzz/projects/robosim/src/meshes/SphereMesh.cpp",
+  "file": "/home/sdzz/projects/robosim/src/meshes/SphereMesh.cpp",
+  "output": "CMakeFiles/robosim.dir/src/meshes/SphereMesh.cpp.o"
+},
+{
+  "directory": "/home/sdzz/projects/robosim/build",
+  "command": "/usr/bin/g++ -I/home/sdzz/projects/robosim/src -I/home/sdzz/projects/robosim/imgui -I/home/sdzz/projects/robosim/imgui/backends -I/home/sdzz/projects/robosim/lib/ImGuizmo -isystem /usr/include/eigen3 -g -std=gnu++17 -o CMakeFiles/robosim.dir/src/rendering/Camera.cpp.o -c /home/sdzz/projects/robosim/src/rendering/Camera.cpp",
+  "file": "/home/sdzz/projects/robosim/src/rendering/Camera.cpp",
+  "output": "CMakeFiles/robosim.dir/src/rendering/Camera.cpp.o"
+},
+{
+  "directory": "/home/sdzz/projects/robosim/build",
+  "command": "/usr/bin/g++ -I/home/sdzz/projects/robosim/src -I/home/sdzz/projects/robosim/imgui -I/home/sdzz/projects/robosim/imgui/backends -I/home/sdzz/projects/robosim/lib/ImGuizmo -isystem /usr/include/eigen3 -g -std=gnu++17 -o CMakeFiles/robosim.dir/imgui/imgui.cpp.o -c /home/sdzz/projects/robosim/imgui/imgui.cpp",
+  "file": "/home/sdzz/projects/robosim/imgui/imgui.cpp",
+  "output": "CMakeFiles/robosim.dir/imgui/imgui.cpp.o"
+},
+{
+  "directory": "/home/sdzz/projects/robosim/build",
+  "command": "/usr/bin/g++ -I/home/sdzz/projects/robosim/src -I/home/sdzz/projects/robosim/imgui -I/home/sdzz/projects/robosim/imgui/backends -I/home/sdzz/projects/robosim/lib/ImGuizmo -isystem /usr/include/eigen3 -g -std=gnu++17 -o CMakeFiles/robosim.dir/imgui/imgui_draw.cpp.o -c /home/sdzz/projects/robosim/imgui/imgui_draw.cpp",
+  "file": "/home/sdzz/projects/robosim/imgui/imgui_draw.cpp",
+  "output": "CMakeFiles/robosim.dir/imgui/imgui_draw.cpp.o"
+},
+{
+  "directory": "/home/sdzz/projects/robosim/build",
+  "command": "/usr/bin/g++ -I/home/sdzz/projects/robosim/src -I/home/sdzz/projects/robosim/imgui -I/home/sdzz/projects/robosim/imgui/backends -I/home/sdzz/projects/robosim/lib/ImGuizmo -isystem /usr/include/eigen3 -g -std=gnu++17 -o CMakeFiles/robosim.dir/imgui/imgui_demo.cpp.o -c /home/sdzz/projects/robosim/imgui/imgui_demo.cpp",
+  "file": "/home/sdzz/projects/robosim/imgui/imgui_demo.cpp",
+  "output": "CMakeFiles/robosim.dir/imgui/imgui_demo.cpp.o"
+},
+{
+  "directory": "/home/sdzz/projects/robosim/build",
+  "command": "/usr/bin/g++ -I/home/sdzz/projects/robosim/src -I/home/sdzz/projects/robosim/imgui -I/home/sdzz/projects/robosim/imgui/backends -I/home/sdzz/projects/robosim/lib/ImGuizmo -isystem /usr/include/eigen3 -g -std=gnu++17 -o CMakeFiles/robosim.dir/imgui/imgui_tables.cpp.o -c /home/sdzz/projects/robosim/imgui/imgui_tables.cpp",
+  "file": "/home/sdzz/projects/robosim/imgui/imgui_tables.cpp",
+  "output": "CMakeFiles/robosim.dir/imgui/imgui_tables.cpp.o"
+},
+{
+  "directory": "/home/sdzz/projects/robosim/build",
+  "command": "/usr/bin/g++ -I/home/sdzz/projects/robosim/src -I/home/sdzz/projects/robosim/imgui -I/home/sdzz/projects/robosim/imgui/backends -I/home/sdzz/projects/robosim/lib/ImGuizmo -isystem /usr/include/eigen3 -g -std=gnu++17 -o CMakeFiles/robosim.dir/imgui/imgui_widgets.cpp.o -c /home/sdzz/projects/robosim/imgui/imgui_widgets.cpp",
+  "file": "/home/sdzz/projects/robosim/imgui/imgui_widgets.cpp",
+  "output": "CMakeFiles/robosim.dir/imgui/imgui_widgets.cpp.o"
+},
+{
+  "directory": "/home/sdzz/projects/robosim/build",
+  "command": "/usr/bin/g++ -I/home/sdzz/projects/robosim/src -I/home/sdzz/projects/robosim/imgui -I/home/sdzz/projects/robosim/imgui/backends -I/home/sdzz/projects/robosim/lib/ImGuizmo -isystem /usr/include/eigen3 -g -std=gnu++17 -o CMakeFiles/robosim.dir/imgui/backends/imgui_impl_glfw.cpp.o -c /home/sdzz/projects/robosim/imgui/backends/imgui_impl_glfw.cpp",
+  "file": "/home/sdzz/projects/robosim/imgui/backends/imgui_impl_glfw.cpp",
+  "output": "CMakeFiles/robosim.dir/imgui/backends/imgui_impl_glfw.cpp.o"
+},
+{
+  "directory": "/home/sdzz/projects/robosim/build",
+  "command": "/usr/bin/g++ -I/home/sdzz/projects/robosim/src -I/home/sdzz/projects/robosim/imgui -I/home/sdzz/projects/robosim/imgui/backends -I/home/sdzz/projects/robosim/lib/ImGuizmo -isystem /usr/include/eigen3 -g -std=gnu++17 -o CMakeFiles/robosim.dir/imgui/backends/imgui_impl_opengl3.cpp.o -c /home/sdzz/projects/robosim/imgui/backends/imgui_impl_opengl3.cpp",
+  "file": "/home/sdzz/projects/robosim/imgui/backends/imgui_impl_opengl3.cpp",
+  "output": "CMakeFiles/robosim.dir/imgui/backends/imgui_impl_opengl3.cpp.o"
+}
+]
