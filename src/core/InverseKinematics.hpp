@@ -11,8 +11,8 @@
 // namespace contains different IK solver functions for use with the robot
 namespace IK {
 
-const float DISTANCE_THRESHOLD = 0.0001f;
-const float	TIMEOUT_MICROS = 1000;
+const float DISTANCE_THRESHOLD = 0.00001f;
+const float	TIMEOUT_MICROS = 60000;
 
 // represents a solution to the inverse kinematics problem
 // if timed_out = true, then the target is unreachable

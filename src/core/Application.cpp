@@ -472,8 +472,10 @@ void Application::render(void) {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	}
 
+	// 加入机器人的mesh
 	std::vector<Vertex> vertices = robot_->getMeshVertices();
 
+	// 加入光源
 	temp += 0.0001;
 	Vector3f lightpos = Vector3f(6 * sin(temp), 3.5, 6 * cos(temp));
 	BoxMesh lightmesh = BoxMesh(0.2, 0.2, 0.2, Vector4f(1, 1, 1, 1));
@@ -481,6 +483,7 @@ void Application::render(void) {
 	std::vector<Vertex> lightverts = lightmesh.getVertices();
 	vertices.insert(vertices.end(), lightverts.begin(), lightverts.end());
 
+	// 红点
 	SphereMesh ikmesh = SphereMesh(0.01, Vector4f(1, 0.2, 0.2, 1.0));
 	ikmesh.transform(Translation3f(ray_end_) * AngleAxisf::Identity());
 	std::vector<Vertex> ikverts = ikmesh.getVertices();
@@ -520,6 +523,7 @@ void Application::render(void) {
 	}
 	vertices.insert(vertices.end(), planeVerts.begin(), planeVerts.end());
 
+	// 绿色半透明的球, 可以删除
 	SphereMesh sphere(0.2f, { 0.0, 0.5, 0, 0.5});
 	Affine3f t = AngleAxisf::Identity() * Translation3f(0, 0.2, 0);
 	sphere.setToWorldTransform(t);
@@ -548,7 +552,7 @@ void Application::render(void) {
 	glUniform3f(gl_.lightColor, 1, 1, 1);
 
 	glBindVertexArray(gl_.simple_vao);
-	glDrawArrays(GL_TRIANGLES, 0, (int)vertices.size());
+	glDrawArrays(GL_TRIANGLES, 0, (int)vertices.size()); // 绘制三角形
 
 
 	checkGlErrors();

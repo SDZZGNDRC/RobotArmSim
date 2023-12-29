@@ -6,7 +6,6 @@
 #include "Robot.hpp"
 #include "Utility.hpp"
 #include "InverseKinematics.hpp"
-
 using namespace Eigen;
 using namespace std;
 
@@ -165,7 +164,7 @@ MatrixXf Robot::getJacobian(VectorXf jointAngles) const {
 		Vector3f upper_part = (rot_b_to_i * z_vec).cross(transl_base_to_n - transl_b_to_i);
 		Vector3f lower_part = rot_b_to_i * z_vec;
 
-		Vector<float, 6> col;
+		Matrix<float, 6, 1> col;
 		col << upper_part, lower_part;
 		jacobian.col(i + 1) = col;
 	}

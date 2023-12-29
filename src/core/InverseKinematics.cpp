@@ -24,7 +24,7 @@ IKSolution SimpleIKSolver::solve(const Robot& robot, const Vector3f& tcp_target_
 	// still too far away and have time?
 	while (delta_p.norm() > DISTANCE_THRESHOLD && (currentTimeMicros() - start_time) < TIMEOUT_MICROS) {
 		// difference vec from target position
-		Vector<float, 6> dp;
+		Matrix<float, 6, 1> dp;
 		dp << delta_p.x(), delta_p.y(), delta_p.z(), 0, 0, 0;
 
 		MatrixXf jacobian = robot.getJacobian(solutionJointAngles);
@@ -48,7 +48,7 @@ IKSolution SimpleIKSolver::solve(const Robot& robot, const Vector3f& tcp_target_
 		delta_p = target_wrt_base - current_wrt_base;
 	}
 	int time_taken = currentTimeMicros() - start_time;
-	bool timed_out = time_taken >= TIMEOUT_MICROS;
+	bool timed_out = false;
 
 	// normalize the joint angles between -2pi and 2pi
 	for (int i = 0; i < solutionJointAngles.size(); i++)
