@@ -1,4 +1,4 @@
-﻿#include <iostream>
+#include <iostream>
 #include <sstream>
 
 #include "imgui.h"
@@ -14,6 +14,7 @@
 #include "Application.hpp"
 #include "Utility.hpp"
 #include "meshes/BoxMesh.hpp"
+#include "meshes/CylinderMesh.hpp"
 #include "meshes/SphereMesh.hpp"
 
 #include "EventDispatcher.hpp"
@@ -60,7 +61,7 @@ void Application::createWindow(int width, int height) {
 
 
 	// Create a GLFWwindow object that we can use for GLFW's functions
-	window_ = glfwCreateWindow(width, height, "Robot Arm Simulator", nullptr, nullptr);
+	window_ = glfwCreateWindow(width, height, "机械臂模拟器", nullptr, nullptr);
 	if (nullptr == window_)
 	{
 		std::cerr << "Failed to create GLFW window" << std::endl;
@@ -82,6 +83,7 @@ void Application::createWindow(int width, int height) {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
+	io.Fonts->AddFontFromFileTTF("/home/sdzz/projects/robosim/SimHei.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesChineseFull());
 
 	{
 		ImGuiStyle* style = &ImGui::GetStyle();
@@ -264,11 +266,12 @@ void Application::run(void) {
 			{
 				robot_->setWorldToBase(Eigen::Affine3f(robot_transform));
 			}
-
-			Begin("Joint angle controls:");
+			
+			ImGui::SetNextWindowSize(ImVec2(300, 310));
+			Begin(u8"关节角度控制");
 			for (int i = 0; i < robot_->getNumJoints(); i++) {
 				PushID(i);
-				Text("joint %d", i);
+				Text(u8"关节 %d", i);
 				SameLine();
 				SliderAngle("", &joint_angle_controls_[i]);
 				// user manually grabbing a slider aborts the running IK solution
@@ -279,46 +282,53 @@ void Application::run(void) {
 				PopID();
 			}
 			PushID(robot_->getNumJoints());
-			Text("gripper");
+			Text(u8"夹子  ");
 			SameLine();
 			SliderAngle("", &gripper_angle_control_, 0, 90.0f);
 			PopID();
 			End();
 
-			Begin("Joint PID controller gains:");
+			ImGui::SetNextWindowSize(ImVec2(200, 160));
+			Begin(u8"关节PID控制器增益");
 			SliderFloat("P", &pid_p, 0, 0.1);
 			SliderFloat("I", &pid_i, 0, 0.05);
 			SliderFloat("D", &pid_d, 0, 0.05);
 			robot_->setJointControllerPidGains(pid_p, pid_i, pid_d);
 			End();
 
-			Begin("TCP info");
+			ImGui::SetNextWindowSize(ImVec2(600, 170));
+			Begin(u8"工具中心点信息");
 			Vector3f tcp_pos = robot_->getTcpWorldPosition();
 			Vector3f tcp_target = robot_->getTargetTcpPosition();
 			VectorXf tcp_speed = robot_->getTcpSpeed();
 			Columns(2);
-			Text("TCP position:");
+			PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 255, 255));
+			Text(u8"工具中心点坐标:");
 			NextColumn();
 			Text("x: % 2.2f, y: % 2.2f, z: % 2.2f", tcp_pos.x(), tcp_pos.y(), tcp_pos.z());
+			PopStyleColor();
 			Separator();
 			NextColumn();
-			Text("TCP target:");
+			PushStyleColor(ImGuiCol_Text, IM_COL32(255, 215, 0, 255));
+			Text(u8"目标点坐标:");
 			NextColumn();
 			Text("x: % 2.2f, y: % 2.2f, z: % 2.2f", tcp_target.x(), tcp_target.y(), tcp_target.z());
+			PopStyleColor();
 			Separator();
 			NextColumn();
-			Text("TCP speed:");
+			Text(u8"工具中心点速度:");
 			NextColumn();
 			Text("x: % 2.2f, y: % 2.2f, z: % 2.2f\nrx: % 2.2f, ry: % 2.2f, rz: % 2.2f",
 				tcp_speed[0], tcp_speed[1], tcp_speed[2], tcp_speed[3], tcp_speed[4], tcp_speed[5]);
 			End();
 
-			Begin("Parameter editor");
-			if (BeginTable("paramtable", robot_->getNumJoints() + 1)) {
+			ImGui::SetNextWindowSize(ImVec2(400, 330));
+			Begin(u8"DH参数编辑器(设置机械臂的形状)");
+			if (BeginTable("paramtable", 4)) {
 				// header row
 				TableHeadersRow();
 				TableNextColumn();
-				Text("");
+				Text(" ");
 				TableNextColumn();
 				Text("a");
 				TableNextColumn();
@@ -332,7 +342,7 @@ void Application::run(void) {
 					TableNextRow();
 					TableNextColumn();
 					//TableSetupColumn("", 0, 10);
-					Text("joint %d", i);
+					Text(u8"关节 %d", i);
 					TableNextColumn();
 					//TableSetupColumn("a", 0, 10);
 					InputFloat("##a", &robot_params[i].a);
@@ -346,13 +356,14 @@ void Application::run(void) {
 				}
 				EndTable();
 			}
-			if (Button("Apply")) {
+			if (Button(u8"应用")) {
 				robot_->setDhParams(robot_params);
 			}
 			End();
 
-			Begin("Performace");
-			Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / GetIO().Framerate, GetIO().Framerate);
+			ImGui::SetNextWindowSize(ImVec2(300, 80));
+			Begin(u8"性能");
+			Text(u8"平均 %.3f 毫秒/帧 (%.1f FPS)", 1000.0f / GetIO().Framerate, GetIO().Framerate);
 			End();
 		}
 
@@ -494,8 +505,8 @@ void Application::render(void) {
 	std::vector<Vertex> lightverts = lightmesh.getVertices();
 	vertices.insert(vertices.end(), lightverts.begin(), lightverts.end());
 
-	// 红点
-	SphereMesh ikmesh = SphereMesh(0.01, Vector4f(1, 0.2, 0.2, 1.0));
+	// 目标点
+	SphereMesh ikmesh = SphereMesh(0.02, Vector4f(1, 0.0, 0.0, 1.0));
 	ikmesh.transform(Translation3f(ray_end_) * AngleAxisf::Identity());
 	std::vector<Vertex> ikverts = ikmesh.getVertices();
 	vertices.insert(vertices.end(), ikverts.begin(), ikverts.end());
@@ -534,12 +545,26 @@ void Application::render(void) {
 	}
 	vertices.insert(vertices.end(), planeVerts.begin(), planeVerts.end());
 
-	// 绿色半透明的球, 可以删除
-	SphereMesh sphere(0.2f, { 0.0, 0.5, 0, 0.5});
-	Affine3f t = AngleAxisf::Identity() * Translation3f(0, 0.2, 0);
+	// 绿色球
+	SphereMesh sphere(0.2f, { 0.0, 0.5, 0, 1.0});
+	Affine3f t = AngleAxisf::Identity() * Translation3f(0, 0.2, 0); // 设置位置
 	sphere.setToWorldTransform(t);
 	std::vector<Vertex> sphere_verts = sphere.getVertices();
 	vertices.insert(vertices.end(), sphere_verts.begin(), sphere_verts.end());
+
+	// 黄色正方体
+	BoxMesh box(0.2f, 0.2f, 0.2f, { 1.0, 1.0, 0, 1.0 });
+	Affine3f t2 = AngleAxisf::Identity() * Translation3f(1.0, 0.1, 1.0); // 设置位置
+	box.setToWorldTransform(t2);
+	std::vector<Vertex> box_verts = box.getVertices();
+	vertices.insert(vertices.end(), box_verts.begin(), box_verts.end());
+
+	// 蓝色圆柱
+	CylinderMesh cylinder(0.1f, 0.2f, { 0.5, 0.0, 0.5, 1.0 });
+	Affine3f t3 = AngleAxisf::Identity() * Translation3f(2.0, 0.1, 0.7); // 设置位置
+	cylinder.setToWorldTransform(t3);
+	std::vector<Vertex> cylinder_verts = cylinder.getVertices();
+	vertices.insert(vertices.end(), cylinder_verts.begin(), cylinder_verts.end());
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
