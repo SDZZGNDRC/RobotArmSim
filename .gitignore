@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 
 robosim
+build/*
